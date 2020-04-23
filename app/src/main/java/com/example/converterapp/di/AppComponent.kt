@@ -2,6 +2,7 @@ package com.example.converterapp.di
 
 import android.app.Application
 import com.example.converterapp.BaseApplication
+import com.example.converterapp.di.viewmodelfactory.ViewModelFactoryModule
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjector
@@ -11,7 +12,9 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [AndroidSupportInjectionModule::class,
-    ActivityBuildersModule::class]
+        ActivityBuildersModule::class,
+        AppModule::class,
+        ViewModelFactoryModule::class]
 )
 interface AppComponent : AndroidInjector<BaseApplication> {
 
