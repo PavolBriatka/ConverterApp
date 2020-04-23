@@ -1,5 +1,6 @@
-package com.example.converterapp.repository.interactor
+package com.example.converterapp.webservice.conversionratesinteractor
 
+import com.example.converterapp.webservice.conversionratesinteractor.ConversionRatesResponseModel
 import io.reactivex.Observable
 import retrofit2.Response
 
