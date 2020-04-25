@@ -7,11 +7,11 @@ import dagger.Module
 import dagger.Provides
 
 @Module
-class MainModule {
+class MainInteractorModule {
 
 
     @Provides
-    fun provideCOnversionRatesInteractor(api: EndpointDefinition): IConversionRatesInteractor {
+    fun provideConversionRatesInteractor(api: EndpointDefinition): IConversionRatesInteractor {
         return ConversionRatesInteractor(api)
     }
 }
