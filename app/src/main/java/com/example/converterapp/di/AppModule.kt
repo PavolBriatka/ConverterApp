@@ -1,6 +1,7 @@
 package com.example.converterapp.di
 
 import com.example.converterapp.BuildConfig
+import com.example.converterapp.webservice.EndpointDefinition
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -50,5 +51,12 @@ class AppModule {
             .client(okHttpClient)
             .baseUrl(BASE_URL)
             .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideApiInterface(retrofit: Retrofit): EndpointDefinition {
+
+        return retrofit.create(EndpointDefinition::class.java)
     }
 }

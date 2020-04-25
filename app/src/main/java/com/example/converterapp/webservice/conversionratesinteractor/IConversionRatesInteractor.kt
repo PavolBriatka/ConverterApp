@@ -6,5 +6,5 @@ import retrofit2.Response
 
 interface IConversionRatesInteractor {
 
-    fun fetchConversionRates(): Observable<Response<ConversionRatesResponseModel>>
+    fun fetchConversionRates(baseCurrency: String = "EUR"): Observable<Response<ConversionRatesResponseModel>>
 }
