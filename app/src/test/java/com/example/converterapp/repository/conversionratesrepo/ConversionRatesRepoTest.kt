@@ -29,12 +29,6 @@ class ConversionRatesRepoTest {
     @InjectMocks
     lateinit var repository: ConversionRatesRepo
 
-
-    @Before
-    fun setUp() {
-
-    }
-
     @Test
     fun fetchRates_correctArgumentPassedToInteractor() {
         //Arrange

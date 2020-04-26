@@ -9,5 +9,5 @@ import retrofit2.http.Query
 interface EndpointDefinition {
 
     @GET("latest")
-    fun fetchCurrencyRates(@Query("base") base: String) : Observable<Response<ConversionRatesResponseModel>>
+    fun fetchConversionRates(@Query("base") base: String) : Observable<Response<ConversionRatesResponseModel>>
 }
