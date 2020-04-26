@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.example.converterapp.repository.ResultBase
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.repository.conversionratesrepo.IConversionRatesRepo
+import com.example.converterapp.utils.round
 import io.reactivex.Observable
 import javax.inject.Inject
 
@@ -14,7 +15,11 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
         return repository.fetchConversionRates()
             .map { result ->
                 when (result) {
-                    is ResultBase.Success -> result.result.conversionRates
+                    is ResultBase.Success -> {
+                        result.result.conversionRates.map {
+                            it.copy(relativeRate =  it.relativeRate.round(2))
+                        } as ArrayList<Currency>
+                    }
                     else -> arrayListOf()
                 }
             }

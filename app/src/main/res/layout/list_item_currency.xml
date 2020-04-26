@@ -52,7 +52,7 @@
             tools:text="Euro" />
     </LinearLayout>
 
-    <com.google.android.material.textfield.TextInputEditText
+    <com.example.converterapp.utils.AmountEditText
         android:id="@+id/et_currency_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:hint="@string/currency_value_hint"
-        android:inputType="number"
+        android:inputType="numberDecimal"
         android:autofillHints="no"
         tools:text="100"/>
 

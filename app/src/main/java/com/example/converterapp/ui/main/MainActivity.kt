@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.converterapp.R
 import com.example.converterapp.di.viewmodelfactory.ViewModelsProviderFactory
-import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.*
+import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.ui.main.adapter.ConverterAdapter
 import com.example.converterapp.ui.main.viewmodel.MainViewModel
 import dagger.android.support.DaggerAppCompatActivity
@@ -36,6 +36,7 @@ class MainActivity : DaggerAppCompatActivity() {
 
         rv_currency_list.apply {
 
+            setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@MainActivity)
             converterAdapter.onItemClicked = { currency ->
                 this.scrollToPosition(0)
@@ -52,7 +53,7 @@ class MainActivity : DaggerAppCompatActivity() {
     private fun subscribeToCurrencyRates(): Disposable {
         return currencyRatesObservable
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {data ->
+            .subscribe { data ->
                 converterAdapter.setData(data)
                 rv_currency_list.adapter = converterAdapter
             }
