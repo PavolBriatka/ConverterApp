@@ -13,7 +13,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(private val repository: IConversionRatesRepo) : ViewModel(),
     ViewModelContract {
 
-    private val dataSubject: PublishSubject<ArrayList<Currency>> = PublishSubject.create()
+    private val dataSubject: PublishSubject<Map<String, Currency>> = PublishSubject.create()
     private val disposables = CompositeDisposable()
 
     override fun fetchCurrencyRates() {
@@ -25,14 +25,14 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
                             is ResultBase.Success -> {
                                 result.result.conversionRates
                             }
-                            else -> arrayListOf()
+                            else -> mapOf()
                         }
                     }
             }.subscribe(dataSubject::onNext)
             .let { disposables.add(it) }
     }
 
-    override fun getCurrencyData(): Observable<ArrayList<Currency>> {
+    override fun getCurrencyData(): Observable<Map<String, Currency>> {
         return dataSubject.hide()
     }
 }

@@ -9,6 +9,7 @@ import com.example.converterapp.repository.conversionratesrepo.ConversionRatesRe
 import com.example.converterapp.ui.main.adapter.ConverterAdapter
 import com.example.converterapp.ui.main.adapter.ConverterAdapterVolTwo
 import com.example.converterapp.ui.main.viewmodel.MainViewModel
+import com.example.converterapp.utils.mapToArray
 import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -56,7 +57,7 @@ class MainActivity : DaggerAppCompatActivity() {
             .observeOn(AndroidSchedulers.mainThread())
             .firstElement()
             .subscribe { data ->
-                converterAdapter.setData(data)
+                converterAdapter.setData(data.mapToArray())
                 rv_currency_list.adapter = converterAdapter
             }
 

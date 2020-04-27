@@ -37,7 +37,7 @@ class CurrencyHelper(res: Resources) {
         Pair("SEK", Pair(res.getString(R.string.sek_name), R.drawable.flag_sweden)),
         Pair("SGD", Pair(res.getString(R.string.sgd_name), R.drawable.flag_singapore)),
         Pair("THB", Pair(res.getString(R.string.thb_name), R.drawable.flag_thailand)),
-        Pair("USD", Pair(res.getString(R.string.usd_name), R.drawable.flag_united_kingdom)),
+        Pair("USD", Pair(res.getString(R.string.usd_name), R.drawable.flag_united_states_of_america)),
         Pair("ZAR", Pair(res.getString(R.string.zar_name), R.drawable.flag_south_africa))
 
     )

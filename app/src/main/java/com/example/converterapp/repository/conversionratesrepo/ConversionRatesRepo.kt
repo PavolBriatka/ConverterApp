@@ -7,7 +7,6 @@ import com.example.converterapp.webservice.conversionratesinteractor.ConversionR
 import com.example.converterapp.webservice.conversionratesinteractor.IConversionRatesInteractor
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import java.util.*
 import javax.inject.Inject
 
 class ConversionRatesRepo @Inject constructor(
@@ -32,7 +31,7 @@ class ConversionRatesRepo @Inject constructor(
 
     private fun handleResponseSuccess(responseBody: ConversionRatesResponseModel?): ResultBase<ConversionRatesResult> {
         responseBody?.let { data ->
-            val ratesArray = assembleRatesArray(data)
+            val ratesArray = assembleData(data)
             return when {
                 ratesArray.isNotEmpty() -> ResultBase.Success(ConversionRatesResult(ratesArray))
                 else -> ResultBase.Error
@@ -40,15 +39,26 @@ class ConversionRatesRepo @Inject constructor(
         } ?: return ResultBase.Error
     }
 
-    private fun assembleRatesArray(data: ConversionRatesResponseModel): ArrayList<Currency> {
+    private fun assembleData(data: ConversionRatesResponseModel): MutableMap<String, Currency> {
 
-        val currencyRates = arrayListOf<Currency>()
+        val currencyRates = mutableMapOf<String, Currency>()
         data.baseCurrency?.let {
             data.rates?.let {
-                currencyRates.add(Currency(currencyCode = data.baseCurrency, relativeRate = 1.0))
-
+                //1. Add base currency
+                currencyRates[data.baseCurrency] = Currency(
+                    currencyCode = data.baseCurrency,
+                    currencyName = currencyHelper.currencyMap[data.baseCurrency]?.first!!,
+                    flagId = currencyHelper.currencyMap[data.baseCurrency]?.second!!,
+                    relativeRate = 1.0
+                )
+                //2. Add rest of the currencies
                 for ((code, rate) in data.rates) {
-                    currencyRates.add(Currency(currencyCode = code, relativeRate = rate))
+                    currencyRates[code] = Currency(
+                        currencyCode = code,
+                        currencyName = currencyHelper.currencyMap[code]?.first!!,
+                        flagId = currencyHelper.currencyMap[code]?.second!!,
+                        relativeRate = rate
+                    )
                 }
             }
         }

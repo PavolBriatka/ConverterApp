@@ -10,6 +10,7 @@ import com.example.converterapp.R
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.ui.main.viewmodel.MainViewModel
 import com.example.converterapp.utils.AmountEditText
+import com.mikhaellopez.circularimageview.CircularImageView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -38,7 +39,7 @@ class ConverterAdapterVolTwo :
 
     inner class CurrencyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
         CurrencyView {
-        val currencyFlag: ImageView = itemView.findViewById(R.id.iv_currency_flag)
+        val currencyFlag: CircularImageView = itemView.findViewById(R.id.iv_currency_flag)
         val currencyCode: TextView = itemView.findViewById(R.id.tv_currency_code)
         val currencyName: TextView = itemView.findViewById(R.id.tv_currency_name)
         val conversionValue: AmountEditText = itemView.findViewById(R.id.et_currency_value)
@@ -92,10 +93,13 @@ class ConverterAdapterVolTwo :
         sharedViewModel.getCurrencyData()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
-                holder.conversionValue.setText(it[position].relativeRate.toString())
+                val rate = it[currentItem.currencyCode]?.relativeRate ?: 0.0
+                holder.conversionValue.setText(rate.toString())
             }.let { holder.subscription = it }
 
         holder.currencyCode.text = currentItem.currencyCode
+        holder.currencyName.text = currentItem.currencyName
+        holder.currencyFlag.setImageResource(currentItem.flagId)
         holder.conversionValue.isEnabled = position == 0
 
     }

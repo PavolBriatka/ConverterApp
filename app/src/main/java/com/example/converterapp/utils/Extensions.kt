@@ -7,3 +7,9 @@ fun Double.round(decimals: Int): Double {
     repeat(decimals) { multiplier *= 10 }
     return round(this * multiplier) / multiplier
 }
+
+fun <K, V> Map<K, V>.mapToArray(): ArrayList<V> {
+    return arrayListOf<V>().apply {
+        addAll(this@mapToArray.values)
+    }
+}

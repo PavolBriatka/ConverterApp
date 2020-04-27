@@ -6,5 +6,5 @@ import io.reactivex.Observable
 interface ViewModelContract {
 
     fun fetchCurrencyRates()
-    fun getCurrencyData(): Observable<ArrayList<Currency>>
+    fun getCurrencyData(): Observable<Map<String, Currency>>
 }
