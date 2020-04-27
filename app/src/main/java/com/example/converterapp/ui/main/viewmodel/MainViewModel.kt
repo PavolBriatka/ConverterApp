@@ -4,24 +4,35 @@ import androidx.lifecycle.ViewModel
 import com.example.converterapp.repository.ResultBase
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.repository.conversionratesrepo.IConversionRatesRepo
-import com.example.converterapp.utils.round
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.subjects.PublishSubject
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(private val repository: IConversionRatesRepo) : ViewModel(),
     ViewModelContract {
 
-    override fun fetchCurrencyRates(): Observable<ArrayList<Currency>> {
-        return repository.fetchConversionRates()
-            .map { result ->
-                when (result) {
-                    is ResultBase.Success -> {
-                        result.result.conversionRates.map {
-                            it.copy(relativeRate =  it.relativeRate.round(2))
-                        } as ArrayList<Currency>
+    private val dataSubject: PublishSubject<ArrayList<Currency>> = PublishSubject.create()
+    private val disposables = CompositeDisposable()
+
+    override fun fetchCurrencyRates() {
+        Observable.interval(0, 1, TimeUnit.SECONDS)
+            .flatMap {
+                repository.fetchConversionRates()
+                    .map { result ->
+                        when (result) {
+                            is ResultBase.Success -> {
+                                result.result.conversionRates
+                            }
+                            else -> arrayListOf()
+                        }
                     }
-                    else -> arrayListOf()
-                }
-            }
+            }.subscribe(dataSubject::onNext)
+            .let { disposables.add(it) }
+    }
+
+    override fun getCurrencyData(): Observable<ArrayList<Currency>> {
+        return dataSubject.hide()
     }
 }

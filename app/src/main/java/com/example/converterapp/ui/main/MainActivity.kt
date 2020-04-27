@@ -7,6 +7,7 @@ import com.example.converterapp.R
 import com.example.converterapp.di.viewmodelfactory.ViewModelsProviderFactory
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.ui.main.adapter.ConverterAdapter
+import com.example.converterapp.ui.main.adapter.ConverterAdapterVolTwo
 import com.example.converterapp.ui.main.viewmodel.MainViewModel
 import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.Observable
@@ -23,21 +24,21 @@ class MainActivity : DaggerAppCompatActivity() {
 
     private lateinit var viewModel: MainViewModel
     private val disposables = CompositeDisposable()
-    private val converterAdapter: ConverterAdapter by lazy { ConverterAdapter() }
+    private val converterAdapter: ConverterAdapterVolTwo by lazy { ConverterAdapterVolTwo() }
 
-    private lateinit var currencyRatesObservable: Observable<ArrayList<Currency>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
-        currencyRatesObservable = viewModel.fetchCurrencyRates()
+        viewModel.fetchCurrencyRates()
 
         rv_currency_list.apply {
 
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@MainActivity)
+            converterAdapter.setViewModel(viewModel)
             converterAdapter.onItemClicked = { currency ->
                 this.scrollToPosition(0)
             }
@@ -51,8 +52,9 @@ class MainActivity : DaggerAppCompatActivity() {
     }
 
     private fun subscribeToCurrencyRates(): Disposable {
-        return currencyRatesObservable
+        return viewModel.getCurrencyData()
             .observeOn(AndroidSchedulers.mainThread())
+            .firstElement()
             .subscribe { data ->
                 converterAdapter.setData(data)
                 rv_currency_list.adapter = converterAdapter

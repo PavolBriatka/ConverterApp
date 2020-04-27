@@ -1,9 +1,9 @@
 package com.example.converterapp.di
 
-import com.example.converterapp.ui.main.MainActivity
 import com.example.converterapp.di.mainmodule.MainInteractorModule
 import com.example.converterapp.di.mainmodule.MainRepositoryModule
 import com.example.converterapp.di.mainmodule.MainViewModelModule
+import com.example.converterapp.ui.main.MainActivity
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 
