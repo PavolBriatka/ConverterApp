@@ -1,4 +1,38 @@
 <resources>
     <string name="app_name">Converter App</string>
     <string name="currency_value_hint">" 0"</string>
+
+    //Currency Names
+    <string name="aud_name">Australian Dollar</string>
+    <string name="bgn_name">Bulgarian Lev</string>
+    <string name="brl_name">Brazilian Real</string>
+    <string name="cad_name">Canadian Dollar</string>
+    <string name="chf_name">Swiss Franc</string>
+    <string name="cny_name">Chinese Yuan</string>
+    <string name="czk_name">Czech Koruna</string>
+    <string name="dkk_name">Danish Krone</string>
+    <string name="eur_name">Euro</string>
+    <string name="gbp_name">British Pound</string>
+    <string name="hkd_name">Hong Kong Dollar</string>
+    <string name="hrk_name">Croatian Kuna</string>
+    <string name="huf_name">Hungarian Forint</string>
+    <string name="idr_name">Indonesian Rupiah</string>
+    <string name="ils_name">Israeli New Shekel</string>
+    <string name="inr_name">Indian Rupee</string>
+    <string name="isk_name">Icelandic Króna</string>
+    <string name="jpy_name">Japanese Yen</string>
+    <string name="krw_name">South Korean Won</string>
+    <string name="mxn_name">Mexican Peso</string>
+    <string name="myr_name">Malaysian Ringgit</string>
+    <string name="nok_name">Norwegian Krone</string>
+    <string name="nzd_name">New Zealand Dollar</string>
+    <string name="php_name">Philippine Peso</string>
+    <string name="pln_name">Poland Złoty</string>
+    <string name="ron_name">Romanian Leu</string>
+    <string name="rub_name">Russian Ruble</string>
+    <string name="sek_name">Swedish Krona</string>
+    <string name="sgd_name">Singapore Dollar</string>
+    <string name="thb_name">Thai Baht</string>
+    <string name="usd_name">United States Dollar</string>
+    <string name="zar_name">South African Rand</string>
 </resources>

@@ -2,6 +2,7 @@ package com.example.converterapp.repository.conversionratesrepo
 
 import com.example.converterapp.repository.ResultBase
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
+import com.example.converterapp.utils.CurrencyHelper
 import com.example.converterapp.webservice.conversionratesinteractor.ConversionRatesResponseModel
 import com.example.converterapp.webservice.conversionratesinteractor.IConversionRatesInteractor
 import io.reactivex.Observable
@@ -9,7 +10,10 @@ import io.reactivex.schedulers.Schedulers
 import java.util.*
 import javax.inject.Inject
 
-class ConversionRatesRepo @Inject constructor(private val interactor: IConversionRatesInteractor) :
+class ConversionRatesRepo @Inject constructor(
+    private val interactor: IConversionRatesInteractor,
+    private val currencyHelper: CurrencyHelper
+) :
     IConversionRatesRepo {
 
     override fun fetchConversionRates(baseCurrency: String): Observable<out ResultBase<ConversionRatesResult>> {
