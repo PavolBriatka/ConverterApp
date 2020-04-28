@@ -5,6 +5,8 @@ import com.example.converterapp.repository.conversionratesrepo.ConversionRatesRe
 import com.example.converterapp.utils.CurrencyHelper
 import com.example.converterapp.webservice.conversionratesinteractor.ConversionRatesResponseModel
 import com.example.converterapp.webservice.conversionratesinteractor.IConversionRatesInteractor
+import com.revolut.rxdata.dod.Data
+import com.revolut.rxdata.dod.DataObservableDelegate
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
@@ -15,18 +17,19 @@ class ConversionRatesRepo @Inject constructor(
 ) :
     IConversionRatesRepo {
 
-    override fun fetchConversionRates(baseCurrency: String): Observable<out ResultBase<ConversionRatesResult>> {
-        return interactor.fetchConversionRates(baseCurrency)
-            .subscribeOn(Schedulers.io())
-            .map { response ->
-                when (response.code()) {
-                    200 -> handleResponseSuccess(response.body())
-                    else -> ResultBase.Error
-                }
-            }
-            .onErrorReturn {
-                ResultBase.Error
-            }
+    override fun fetchConversionRates(baseCurrency: String): Observable<Data<ResultBase<ConversionRatesResult>>> {
+        return currencyRatesDod.observe(baseCurrency, true)
+//        return interactor.fetchConversionRates(baseCurrency)
+//            .subscribeOn(Schedulers.io())
+//            .map { response ->
+//                when (response.code()) {
+//                    200 -> handleResponseSuccess(response.body())
+//                    else -> ResultBase.Error
+//                }
+//            }
+//            .onErrorReturn {
+//                ResultBase.Error
+//            }
     }
 
     private fun handleResponseSuccess(responseBody: ConversionRatesResponseModel?): ResultBase<ConversionRatesResult> {
@@ -64,4 +67,34 @@ class ConversionRatesRepo @Inject constructor(
         }
         return currencyRates
     }
+
+    val currencyRatesDod : DataObservableDelegate<String, String, ResultBase<ConversionRatesResult>> = DataObservableDelegate(
+        paramsKey = {"KEY"},
+        fromNetwork = {baseCurrency ->
+            interactor.fetchConversionRates(baseCurrency)
+                .subscribeOn(Schedulers.io())
+                .map { response ->
+                    when (response.code()) {
+                        200 -> handleResponseSuccess(response.body())
+                        else -> ResultBase.Error
+                    }
+                }
+                .onErrorReturn {
+                    ResultBase.Error
+                }
+        },
+        fromMemory = { key, params ->
+            ResultBase.Error
+        },
+        fromStorage = {key, params ->
+            ResultBase.Error
+        },
+        toMemory = { key, params, domain ->
+
+        },
+        toStorage = { key, params, domain ->
+
+        }
+
+    )
 }
