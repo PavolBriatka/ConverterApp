@@ -7,4 +7,6 @@ interface ViewModelContract {
 
     fun fetchCurrencyRates()
     fun getCurrencyData(): Observable<Map<String, Currency>>
+    fun getUserInput(): Observable<String>
+    fun updateUserInput(input: String)
 }

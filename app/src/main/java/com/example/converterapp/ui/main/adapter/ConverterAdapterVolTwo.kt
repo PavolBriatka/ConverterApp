@@ -17,6 +17,12 @@ import io.reactivex.disposables.Disposable
 class ConverterAdapterVolTwo :
     RecyclerView.Adapter<ConverterAdapterVolTwo.CurrencyViewHolder>() {
 
+    companion object ViewType {
+
+        private const val BASE_CURRENCY_VIEW = 11
+        private const val SECONDARY_CURRENCY_VIEW = 22
+    }
+
     var onItemClicked: ((Currency) -> Unit)? = null
     var currencyData = arrayListOf<Currency>()
     private var disposables = CompositeDisposable()
@@ -51,6 +57,7 @@ class ConverterAdapterVolTwo :
             itemView.setOnClickListener {
                 if (adapterPosition > 0) {
                     val itemToMove = currencyData[adapterPosition]
+                    sharedViewModel.updateUserInput(conversionValue.text.toString())
 
                     onItemClicked?.invoke(itemToMove)
 
@@ -81,28 +88,55 @@ class ConverterAdapterVolTwo :
         return currencyData.size
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return if (position == 0) BASE_CURRENCY_VIEW else SECONDARY_CURRENCY_VIEW
+    }
+
     override fun onBindViewHolder(holder: CurrencyViewHolder, position: Int) {
 
         val currentItem = currencyData[position]
 
+        with(holder) {
 
-        holder.currencyCode.text = currentItem.currencyCode
-        holder.currencyName.text = currentItem.currencyName
-        holder.currencyFlag.setImageResource(currentItem.flagId)
-        holder.conversionValue.isEnabled = position == 0
+            currencyCode.text = currentItem.currencyCode
+            currencyName.text = currentItem.currencyName
+            currencyFlag.setImageResource(currentItem.flagId)
+            conversionValue.isEnabled = position == 0
 
-            if (holder.subscription != null) {
-                holder.subscription!!.dispose()
+            if (subscription != null) {
+                subscription!!.dispose()
             }
 
-            sharedViewModel.getCurrencyData()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    val rate = it[currentItem.currencyCode]?.relativeRate ?: 0.0
-                    holder.conversionValue.setText(rate.toString())
-                }.let { holder.subscription = it }
+            when (getItemViewType(position)) {
+                BASE_CURRENCY_VIEW -> {
+                    subscription = subscribeToUserInput { value ->
+                        conversionValue.setText(value)
+                    }
+                }
+                SECONDARY_CURRENCY_VIEW -> {
+                    subscription = subscribeToData { data ->
+                        val rate = data[currentItem.currencyCode]?.relativeRate ?: 0.0
+                        conversionValue.setText(rate.toString())
+                    }
+                }
+            }
+        }
+    }
 
+    private inline fun subscribeToUserInput(crossinline toExecute: (String) -> Unit): Disposable {
+        return sharedViewModel.getUserInput()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { value ->
+                toExecute.invoke(value)
+            }
+    }
 
+    private inline fun subscribeToData(crossinline toExecute: (Map<String, Currency>) -> Unit): Disposable {
+        return sharedViewModel.getCurrencyData()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { data ->
+                toExecute.invoke(data)
+            }
     }
 
 }

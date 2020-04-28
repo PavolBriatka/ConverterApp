@@ -15,6 +15,7 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
     ViewModelContract {
 
     private val dataSubject: BehaviorSubject<Map<String, Currency>> = BehaviorSubject.create()
+    private val userInput: BehaviorSubject<String> = BehaviorSubject.createDefault("1")
     private val disposables = CompositeDisposable()
 
     override fun fetchCurrencyRates() {
@@ -37,5 +38,14 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
 
     override fun getCurrencyData(): Observable<Map<String, Currency>> {
         return dataSubject.hide()
+    }
+
+    override fun getUserInput(): Observable<String> {
+        return userInput.hide()
+    }
+
+    override fun updateUserInput(input: String) {
+        Log.e("userInput", input)
+        userInput.onNext(input)
     }
 }
