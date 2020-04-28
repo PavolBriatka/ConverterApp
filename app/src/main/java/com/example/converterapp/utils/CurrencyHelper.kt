@@ -33,11 +33,11 @@ class CurrencyHelper(res: Resources) {
         Pair("PHP", Pair(res.getString(R.string.php_name), R.drawable.flag_philippines)),
         Pair("PLN", Pair(res.getString(R.string.pln_name), R.drawable.flag_poland)),
         Pair("RON", Pair(res.getString(R.string.ron_name), R.drawable.flag_romania)),
-        Pair("RUB", Pair(res.getString(R.string.rub_name), R.drawable.flag_russian_federation)),
+        Pair("RUB", Pair(res.getString(R.string.rub_name), R.drawable.flag_russia)),
         Pair("SEK", Pair(res.getString(R.string.sek_name), R.drawable.flag_sweden)),
         Pair("SGD", Pair(res.getString(R.string.sgd_name), R.drawable.flag_singapore)),
         Pair("THB", Pair(res.getString(R.string.thb_name), R.drawable.flag_thailand)),
-        Pair("USD", Pair(res.getString(R.string.usd_name), R.drawable.flag_united_states_of_america)),
+        Pair("USD", Pair(res.getString(R.string.usd_name), R.drawable.flag_usa)),
         Pair("ZAR", Pair(res.getString(R.string.zar_name), R.drawable.flag_south_africa))
 
     )
