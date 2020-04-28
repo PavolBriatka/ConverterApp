@@ -1,11 +1,12 @@
 package com.example.converterapp.repository.conversionratesrepo
 
+import android.util.Log
 import com.example.converterapp.repository.ResultBase
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.utils.CurrencyHelper
+import com.example.converterapp.utils.extractData
 import com.example.converterapp.webservice.conversionratesinteractor.ConversionRatesResponseModel
 import com.example.converterapp.webservice.conversionratesinteractor.IConversionRatesInteractor
-import com.revolut.rxdata.dod.Data
 import com.revolut.rxdata.dod.DataObservableDelegate
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
@@ -17,8 +18,9 @@ class ConversionRatesRepo @Inject constructor(
 ) :
     IConversionRatesRepo {
 
-    override fun fetchConversionRates(baseCurrency: String): Observable<Data<ResultBase<ConversionRatesResult>>> {
-        return currencyRatesDod.observe(baseCurrency, true)
+    override fun fetchConversionRates(baseCurrency: String):
+            Observable<ResultBase<ConversionRatesResult>> =
+        currencyRatesDod.observe(baseCurrency, true).extractData()
 //        return interactor.fetchConversionRates(baseCurrency)
 //            .subscribeOn(Schedulers.io())
 //            .map { response ->
@@ -30,9 +32,10 @@ class ConversionRatesRepo @Inject constructor(
 //            .onErrorReturn {
 //                ResultBase.Error
 //            }
-    }
+
 
     private fun handleResponseSuccess(responseBody: ConversionRatesResponseModel?): ResultBase<ConversionRatesResult> {
+        Log.e("handleResponse", "called")
         responseBody?.let { data ->
             val ratesArray = assembleData(data)
             return when {
@@ -43,6 +46,7 @@ class ConversionRatesRepo @Inject constructor(
     }
 
     private fun assembleData(data: ConversionRatesResponseModel): MutableMap<String, Currency> {
+        Log.e("assembleData", "called")
 
         val currencyRates = mutableMapOf<String, Currency>()
         data.baseCurrency?.let {
@@ -68,33 +72,22 @@ class ConversionRatesRepo @Inject constructor(
         return currencyRates
     }
 
-    val currencyRatesDod : DataObservableDelegate<String, String, ResultBase<ConversionRatesResult>> = DataObservableDelegate(
-        paramsKey = {"KEY"},
-        fromNetwork = {baseCurrency ->
-            interactor.fetchConversionRates(baseCurrency)
-                .subscribeOn(Schedulers.io())
-                .map { response ->
-                    when (response.code()) {
-                        200 -> handleResponseSuccess(response.body())
-                        else -> ResultBase.Error
+    val currencyRatesDod: DataObservableDelegate<String, String, ResultBase<ConversionRatesResult>> =
+        DataObservableDelegate(
+            paramsKey = { "CURRENCY_RATES" },
+            fromNetwork = { baseCurrency ->
+                interactor.fetchConversionRates(baseCurrency)
+                    .subscribeOn(Schedulers.io())
+                    .map { response ->
+                        when (response.code()) {
+                            200 -> handleResponseSuccess(response.body())
+                            else -> ResultBase.Error
+                        }
                     }
-                }
-                .onErrorReturn {
-                    ResultBase.Error
-                }
-        },
-        fromMemory = { key, params ->
-            ResultBase.Error
-        },
-        fromStorage = {key, params ->
-            ResultBase.Error
-        },
-        toMemory = { key, params, domain ->
+                    .onErrorReturn {
+                        ResultBase.Error
+                    }
+            }
 
-        },
-        toStorage = { key, params, domain ->
-
-        }
-
-    )
+        )
 }

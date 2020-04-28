@@ -1,5 +1,6 @@
 package com.example.converterapp.ui.main.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.converterapp.repository.ResultBase
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
@@ -28,7 +29,11 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
                             else -> mapOf()
                         }
                     }
-            }.subscribe(dataSubject::onNext)
+            }
+            .subscribe{
+                Log.e("size", "${it.size}")
+                dataSubject.onNext(it)
+            }
             .let { disposables.add(it) }
     }
 
