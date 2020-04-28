@@ -5,8 +5,10 @@ import androidx.lifecycle.ViewModel
 import com.example.converterapp.repository.ResultBase
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.repository.conversionratesrepo.IConversionRatesRepo
+import com.example.converterapp.utils.round
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.BehaviorSubject
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -14,8 +16,9 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(private val repository: IConversionRatesRepo) : ViewModel(),
     ViewModelContract {
 
-    private val dataSubject: BehaviorSubject<Map<String, Currency>> = BehaviorSubject.create()
-    private val userInput: BehaviorSubject<String> = BehaviorSubject.createDefault("1")
+    private val ratesSubject: BehaviorSubject<Map<String, Currency>> = BehaviorSubject.create()
+    private val userInputSubject: BehaviorSubject<Pair<String, String>> =
+        BehaviorSubject.createDefault(Pair("EUR", "1"))
     private val disposables = CompositeDisposable()
 
     override fun fetchCurrencyRates() {
@@ -23,7 +26,6 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
             .flatMapSingle {
                 repository.fetchConversionRates()
                     .map { result ->
-                        Log.e("TAG", "google")
                         when (result) {
                             is ResultBase.Success -> {
                                 result.result.conversionRates
@@ -32,20 +34,34 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
                         }
                     }.firstOrError()
             }
-            .subscribe(dataSubject::onNext)
+            .subscribe(ratesSubject::onNext)
             .let { disposables.add(it) }
     }
 
     override fun getCurrencyData(): Observable<Map<String, Currency>> {
-        return dataSubject.hide()
+        return Observable.combineLatest(getCurrencyRates(), getUserInput(),
+            BiFunction<Map<String, Currency>, Pair<String, String>, Map<String, Currency>> { ratesMap, baseCurrency ->
+                val baseCurrencyRate = ratesMap[baseCurrency.first]?.relativeRate!!
+                val userInput = baseCurrency.second
+                val finalData = mutableMapOf<String, Currency>()
+                for ((code, currency) in ratesMap) {
+                    finalData[code] =
+                        currency.copy(relativeRate = ((currency.relativeRate / baseCurrencyRate) * userInput.toDouble()).round(3))
+                }
+                finalData
+            })
     }
 
-    override fun getUserInput(): Observable<String> {
-        return userInput.hide()
+    private fun getCurrencyRates(): Observable<Map<String, Currency>> {
+        return ratesSubject.hide()
     }
 
-    override fun updateUserInput(input: String) {
-        Log.e("userInput", input)
-        userInput.onNext(input)
+    override fun getUserInput(): Observable<Pair<String, String>> {
+        return userInputSubject.hide()
+    }
+
+    override fun updateUserInput(input: Pair<String, String>) {
+        Log.e("userInput", "${input.first}, ${input.second}")
+        userInputSubject.onNext(input)
     }
 }

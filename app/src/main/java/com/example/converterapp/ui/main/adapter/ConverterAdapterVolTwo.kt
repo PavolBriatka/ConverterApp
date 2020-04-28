@@ -23,7 +23,7 @@ class ConverterAdapterVolTwo :
         private const val SECONDARY_CURRENCY_VIEW = 22
     }
 
-    var onItemClicked: ((Currency) -> Unit)? = null
+    var onItemClicked: (() -> Unit)? = null
     var currencyData = arrayListOf<Currency>()
     private var disposables = CompositeDisposable()
 
@@ -52,29 +52,20 @@ class ConverterAdapterVolTwo :
         private var disposables = CompositeDisposable()
         var subscription: Disposable? = null
 
-        init {
-
-            itemView.setOnClickListener {
-                if (adapterPosition > 0) {
-                    val itemToMove = currencyData[adapterPosition]
-                    sharedViewModel.updateUserInput(conversionValue.text.toString())
-
-                    onItemClicked?.invoke(itemToMove)
-
-                    currencyData.remove(itemToMove)
-                    currencyData.add(0, itemToMove)
-                    notifyItemMoved(adapterPosition, 0)
-                    notifyItemRangeChanged(0, currencyData.size)
-                }
-            }
-        }
-
         override fun updateCurrencyValue(value: Double) {
             conversionValue.setText(value.toString())
         }
 
         override fun clearSubscription() {
             if (subscription != null) subscription!!.dispose()
+        }
+
+        fun moveItem(item: Currency) {
+            onItemClicked?.invoke()
+            currencyData.remove(item)
+            currencyData.add(0, item)
+            notifyItemMoved(adapterPosition, 0)
+            notifyItemRangeChanged(0, currencyData.size)
         }
     }
 
@@ -110,10 +101,14 @@ class ConverterAdapterVolTwo :
             when (getItemViewType(position)) {
                 BASE_CURRENCY_VIEW -> {
                     subscription = subscribeToUserInput { value ->
-                        conversionValue.setText(value)
+                        conversionValue.setText(value.second)
                     }
                 }
                 SECONDARY_CURRENCY_VIEW -> {
+                    itemView.setOnClickListener {
+                        sharedViewModel.updateUserInput(Pair(currentItem.currencyCode, conversionValue.text.toString()))
+                        moveItem(currentItem)
+                    }
                     subscription = subscribeToData { data ->
                         val rate = data[currentItem.currencyCode]?.relativeRate ?: 0.0
                         conversionValue.setText(rate.toString())
@@ -123,7 +118,7 @@ class ConverterAdapterVolTwo :
         }
     }
 
-    private inline fun subscribeToUserInput(crossinline toExecute: (String) -> Unit): Disposable {
+    private inline fun subscribeToUserInput(crossinline toExecute: (Pair<String, String>) -> Unit): Disposable {
         return sharedViewModel.getUserInput()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { value ->

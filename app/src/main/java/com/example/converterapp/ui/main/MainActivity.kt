@@ -40,7 +40,7 @@ class MainActivity : DaggerAppCompatActivity() {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@MainActivity)
             converterAdapter.setViewModel(viewModel)
-            converterAdapter.onItemClicked = { currency ->
+            converterAdapter.onItemClicked = {
                 this.scrollToPosition(0)
             }
 
