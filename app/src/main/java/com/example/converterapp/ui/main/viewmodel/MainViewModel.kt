@@ -6,14 +6,14 @@ import com.example.converterapp.repository.conversionratesrepo.ConversionRatesRe
 import com.example.converterapp.repository.conversionratesrepo.IConversionRatesRepo
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.BehaviorSubject
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(private val repository: IConversionRatesRepo) : ViewModel(),
     ViewModelContract {
 
-    private val dataSubject: PublishSubject<Map<String, Currency>> = PublishSubject.create()
+    private val dataSubject: BehaviorSubject<Map<String, Currency>> = BehaviorSubject.create()
     private val disposables = CompositeDisposable()
 
     override fun fetchCurrencyRates() {

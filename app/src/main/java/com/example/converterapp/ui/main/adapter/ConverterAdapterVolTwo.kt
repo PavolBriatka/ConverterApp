@@ -3,7 +3,6 @@ package com.example.converterapp.ui.main.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.converterapp.R
@@ -86,21 +85,23 @@ class ConverterAdapterVolTwo :
 
         val currentItem = currencyData[position]
 
-        if (holder.subscription != null) {
-            holder.subscription!!.dispose()
-        }
-
-        sharedViewModel.getCurrencyData()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                val rate = it[currentItem.currencyCode]?.relativeRate ?: 0.0
-                holder.conversionValue.setText(rate.toString())
-            }.let { holder.subscription = it }
 
         holder.currencyCode.text = currentItem.currencyCode
         holder.currencyName.text = currentItem.currencyName
         holder.currencyFlag.setImageResource(currentItem.flagId)
         holder.conversionValue.isEnabled = position == 0
+
+            if (holder.subscription != null) {
+                holder.subscription!!.dispose()
+            }
+
+            sharedViewModel.getCurrencyData()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    val rate = it[currentItem.currencyCode]?.relativeRate ?: 0.0
+                    holder.conversionValue.setText(rate.toString())
+                }.let { holder.subscription = it }
+
 
     }
 
