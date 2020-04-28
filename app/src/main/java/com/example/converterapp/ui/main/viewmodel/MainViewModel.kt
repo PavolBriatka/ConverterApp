@@ -19,21 +19,19 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
 
     override fun fetchCurrencyRates() {
         Observable.interval(0, 1, TimeUnit.SECONDS)
-            .flatMap {
+            .flatMapSingle {
                 repository.fetchConversionRates()
                     .map { result ->
+                        Log.e("TAG", "google")
                         when (result) {
                             is ResultBase.Success -> {
                                 result.result.conversionRates
                             }
                             else -> mapOf()
                         }
-                    }
+                    }.firstOrError()
             }
-            .subscribe{
-                Log.e("size", "${it.size}")
-                dataSubject.onNext(it)
-            }
+            .subscribe(dataSubject::onNext)
             .let { disposables.add(it) }
     }
 

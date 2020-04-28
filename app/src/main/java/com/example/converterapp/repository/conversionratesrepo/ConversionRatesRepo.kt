@@ -21,21 +21,9 @@ class ConversionRatesRepo @Inject constructor(
     override fun fetchConversionRates(baseCurrency: String):
             Observable<ResultBase<ConversionRatesResult>> =
         currencyRatesDod.observe(baseCurrency, true).extractData()
-//        return interactor.fetchConversionRates(baseCurrency)
-//            .subscribeOn(Schedulers.io())
-//            .map { response ->
-//                when (response.code()) {
-//                    200 -> handleResponseSuccess(response.body())
-//                    else -> ResultBase.Error
-//                }
-//            }
-//            .onErrorReturn {
-//                ResultBase.Error
-//            }
 
 
     private fun handleResponseSuccess(responseBody: ConversionRatesResponseModel?): ResultBase<ConversionRatesResult> {
-        Log.e("handleResponse", "called")
         responseBody?.let { data ->
             val ratesArray = assembleData(data)
             return when {
@@ -46,7 +34,6 @@ class ConversionRatesRepo @Inject constructor(
     }
 
     private fun assembleData(data: ConversionRatesResponseModel): MutableMap<String, Currency> {
-        Log.e("assembleData", "called")
 
         val currencyRates = mutableMapOf<String, Currency>()
         data.baseCurrency?.let {
@@ -72,7 +59,7 @@ class ConversionRatesRepo @Inject constructor(
         return currencyRates
     }
 
-    val currencyRatesDod: DataObservableDelegate<String, String, ResultBase<ConversionRatesResult>> =
+    private val currencyRatesDod: DataObservableDelegate<String, String, ResultBase<ConversionRatesResult>> =
         DataObservableDelegate(
             paramsKey = { "CURRENCY_RATES" },
             fromNetwork = { baseCurrency ->
