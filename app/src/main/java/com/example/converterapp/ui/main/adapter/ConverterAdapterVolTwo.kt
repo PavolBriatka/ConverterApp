@@ -3,12 +3,14 @@ package com.example.converterapp.ui.main.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.converterapp.R
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.ui.main.viewmodel.MainViewModel
 import com.example.converterapp.utils.AmountEditText
+import com.jakewharton.rxbinding3.widget.textChanges
 import com.mikhaellopez.circularimageview.CircularImageView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -25,7 +27,6 @@ class ConverterAdapterVolTwo :
 
     var onItemClicked: (() -> Unit)? = null
     var currencyData = arrayListOf<Currency>()
-    private var disposables = CompositeDisposable()
 
     private lateinit var sharedViewModel: MainViewModel
 
@@ -49,7 +50,7 @@ class ConverterAdapterVolTwo :
         val currencyName: TextView = itemView.findViewById(R.id.tv_currency_name)
         val conversionValue: AmountEditText = itemView.findViewById(R.id.et_currency_value)
 
-        private var disposables = CompositeDisposable()
+        var disposables = CompositeDisposable()
         var subscription: Disposable? = null
 
         override fun updateCurrencyValue(value: Double) {
@@ -61,9 +62,9 @@ class ConverterAdapterVolTwo :
         }
 
         fun moveItem(item: Currency) {
-            onItemClicked?.invoke()
             currencyData.remove(item)
             currencyData.add(0, item)
+            onItemClicked?.invoke()
             notifyItemMoved(adapterPosition, 0)
             notifyItemRangeChanged(0, currencyData.size)
         }
@@ -94,33 +95,47 @@ class ConverterAdapterVolTwo :
             currencyFlag.setImageResource(currentItem.flagId)
             conversionValue.isEnabled = position == 0
 
-            if (subscription != null) {
-                subscription!!.dispose()
-            }
+            disposables.clear()
 
             when (getItemViewType(position)) {
-                BASE_CURRENCY_VIEW -> {
-                    subscription = subscribeToUserInput { value ->
+                 BASE_CURRENCY_VIEW -> {
+                    disposables.addAll(subscribeToUserInput { value ->
                         conversionValue.setText(value.second)
-                    }
+                    },
+                    conversionValue.subscribeToTextChanges{ input ->
+                        sharedViewModel.updateUserInput(
+                            Pair(currentItem.currencyCode, input.toString())
+                        )
+                    })
                 }
-                SECONDARY_CURRENCY_VIEW -> {
+                else -> {
                     itemView.setOnClickListener {
-                        sharedViewModel.updateUserInput(Pair(currentItem.currencyCode, conversionValue.text.toString()))
+                        sharedViewModel.updateUserInput(
+                            Pair(currentItem.currencyCode, conversionValue.text.toString())
+                        )
                         moveItem(currentItem)
                     }
-                    subscription = subscribeToData { data ->
+                    disposables.add(subscribeToData { data ->
                         val rate = data[currentItem.currencyCode]?.relativeRate ?: 0.0
                         conversionValue.setText(rate.toString())
-                    }
+                    })
                 }
+
             }
         }
+    }
+
+    private inline fun EditText.subscribeToTextChanges(crossinline toExecute: (input: CharSequence) -> Unit): Disposable {
+        return this.textChanges()
+            .subscribe {
+                toExecute.invoke(if (it.isNotBlank()) it else "0.0")
+            }
     }
 
     private inline fun subscribeToUserInput(crossinline toExecute: (Pair<String, String>) -> Unit): Disposable {
         return sharedViewModel.getUserInput()
             .observeOn(AndroidSchedulers.mainThread())
+            .firstElement()
             .subscribe { value ->
                 toExecute.invoke(value)
             }
