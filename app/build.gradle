@@ -69,6 +69,9 @@ dependencies {
     implementation 'com.revolut.rxdata:dod:1.0'
     //Custom round ImageView
     implementation 'com.mikhaellopez:circularimageview:4.1.0'
+    //Room database
+    implementation "androidx.room:room-runtime:2.2.5"
+    kapt "androidx.room:room-compiler:2.2.5"
 
     testImplementation 'junit:junit:4.12'
     testImplementation "androidx.test:core:1.2.0"

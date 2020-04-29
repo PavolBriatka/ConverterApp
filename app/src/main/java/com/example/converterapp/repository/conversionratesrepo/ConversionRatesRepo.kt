@@ -1,8 +1,10 @@
 package com.example.converterapp.repository.conversionratesrepo
 
+import android.util.Log
 import com.example.converterapp.repository.ResultBase
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.utils.CurrencyHelper
+import com.example.converterapp.utils.DatabaseUtil
 import com.example.converterapp.utils.extractData
 import com.example.converterapp.webservice.conversionratesinteractor.ConversionRatesResponseModel
 import com.example.converterapp.webservice.conversionratesinteractor.IConversionRatesInteractor
@@ -13,13 +15,14 @@ import javax.inject.Inject
 
 class ConversionRatesRepo @Inject constructor(
     private val interactor: IConversionRatesInteractor,
-    private val currencyHelper: CurrencyHelper
+    private val currencyHelper: CurrencyHelper,
+    private val databaseUtil: DatabaseUtil
 ) :
     IConversionRatesRepo {
 
     override fun fetchConversionRates(baseCurrency: String):
             Observable<ResultBase<ConversionRatesResult>> =
-        currencyRatesDod.observe(baseCurrency, true).extractData()
+        currencyRatesDod.observe(baseCurrency).extractData()
 
 
     private fun handleResponseSuccess(responseBody: ConversionRatesResponseModel?): ResultBase<ConversionRatesResult> {
@@ -73,7 +76,39 @@ class ConversionRatesRepo @Inject constructor(
                     .onErrorReturn {
                         ResultBase.Error
                     }
+            },
+            fromMemory = { _, _ ->
+               val data = CurrencyMapCache.retrieveData()
+                when {
+                    data.isNotEmpty() -> {
+                        Log.e("MEMORY_DATA", "SUCCESS")
+                        ResultBase.Success(ConversionRatesResult(data))}
+                    else -> null
+                }
+            },
+            fromStorage = { _, _ ->
+                val dbData = databaseUtil.retrieveAndConvert()
+                when  {
+                    dbData.conversionRates.isNotEmpty() -> {
+                        Log.e("DB_DATA", "SUCCESS")
+                        ResultBase.Success(dbData)
+                    }
+                    else -> null
+                }
+            },
+            toMemory = { _,_, domain ->
+                when(domain) {
+                    is ResultBase.Success ->
+                        CurrencyMapCache.saveData(domain.result.conversionRates)
+                }
+            },
+            toStorage = { _, _, domain ->
+                when (domain) {
+                    is ResultBase.Success -> {
+                        databaseUtil.convertAndSave(domain.result)
+                    }
+                }
             }
 
-        )
+            )
 }
