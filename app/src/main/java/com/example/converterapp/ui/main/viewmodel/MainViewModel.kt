@@ -7,6 +7,7 @@ import com.example.converterapp.repository.conversionratesrepo.ConversionRatesRe
 import com.example.converterapp.repository.conversionratesrepo.IConversionRatesRepo
 import com.example.converterapp.utils.round
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.BehaviorSubject
@@ -23,16 +24,17 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
 
     override fun fetchCurrencyRates() {
         Observable.interval(0, 1, TimeUnit.SECONDS)
-            .flatMapSingle {
+            .flatMap {
                 repository.fetchConversionRates()
-                    .map { result ->
+                    .flatMapSingle { result ->
+                        Log.e("result", "called")
                         when (result) {
                             is ResultBase.Success -> {
-                                result.result.conversionRates
+                                Single.just(result.result.conversionRates)
                             }
-                            else -> mapOf()
+                            else -> Single.just(mapOf())
                         }
-                    }.firstOrError()
+                    }.take(3)
             }
             .subscribe(ratesSubject::onNext)
             .let { disposables.add(it) }
