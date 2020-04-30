@@ -1,6 +1,10 @@
 package com.example.converterapp.di
 
+import android.app.Application
+import android.content.Context
 import com.example.converterapp.BuildConfig
+import com.example.converterapp.database.AppDatabase
+import com.example.converterapp.utils.DatabaseUtil
 import com.example.converterapp.webservice.EndpointDefinition
 import dagger.Module
 import dagger.Provides
@@ -17,6 +21,24 @@ class AppModule {
 
     companion object {
         const val BASE_URL = "https://hiring.revolut.codes/api/android/"
+    }
+
+    @Singleton
+    @Provides
+    fun provideContext(application: Application): Context {
+        return application.applicationContext
+    }
+
+    @Singleton
+    @Provides
+    fun provideAppDatabase(context: Context): AppDatabase? {
+        return AppDatabase.getDatabase(context)
+    }
+
+    @Singleton
+    @Provides
+    fun provideDatabaseUtil(appDatabase: AppDatabase?): DatabaseUtil {
+        return DatabaseUtil(appDatabase)
     }
 
     @Singleton

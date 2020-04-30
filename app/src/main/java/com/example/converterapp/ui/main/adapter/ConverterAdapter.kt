@@ -1,69 +1,62 @@
 package com.example.converterapp.ui.main.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import android.widget.EditText
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.converterapp.R
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
+import com.example.converterapp.ui.main.viewmodel.MainViewModel
 import com.example.converterapp.utils.AmountEditText
 import com.jakewharton.rxbinding3.widget.textChanges
+import com.mikhaellopez.circularimageview.CircularImageView
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.disposables.Disposable
 
 class ConverterAdapter :
     RecyclerView.Adapter<ConverterAdapter.CurrencyViewHolder>() {
 
-    var onItemClicked: ((Currency) -> Unit)? = null
+    companion object ViewType {
+
+        private const val BASE_CURRENCY_VIEW = 11
+        private const val SECONDARY_CURRENCY_VIEW = 22
+    }
+
+    var onItemClicked: (() -> Unit)? = null
     var currencyData = arrayListOf<Currency>()
-    private var disposables = CompositeDisposable()
+
+    private lateinit var sharedViewModel: MainViewModel
+
+    fun setViewModel(viewModel: MainViewModel) {
+        sharedViewModel = viewModel
+    }
 
     fun setData(newData: ArrayList<Currency>) {
 
-        currencyData = newData
-        notifyDataSetChanged()
+        if (currencyData.isEmpty()) {
+            currencyData = newData
+            notifyDataSetChanged()
+        }
+
     }
 
-    inner class CurrencyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val currencyFlag: ImageView = itemView.findViewById(R.id.iv_currency_flag)
+    inner class CurrencyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
+        val currencyFlag: CircularImageView = itemView.findViewById(R.id.iv_currency_flag)
         val currencyCode: TextView = itemView.findViewById(R.id.tv_currency_code)
         val currencyName: TextView = itemView.findViewById(R.id.tv_currency_name)
         val conversionValue: AmountEditText = itemView.findViewById(R.id.et_currency_value)
 
-        private var disposables = CompositeDisposable()
-        var baseCurrency: Currency = currencyData[0]
-        var baseValue = PublishSubject.create<Double>()
+        var disposables = CompositeDisposable()
 
-        init {
-
-            itemView.setOnClickListener {
-                if (adapterPosition > 0) {
-                    val itemToMove = currencyData[adapterPosition]
-
-                    onItemClicked?.invoke(itemToMove)
-                    baseCurrency = itemToMove
-
-                    currencyData.remove(itemToMove)
-                    currencyData.add(0, itemToMove)
-                    notifyItemMoved(adapterPosition, 0)
-                    notifyItemRangeChanged(0, currencyData.size)
-                }
-            }
-
-            //Add check for string 0 (either map{} or check in subscribe)
-            //don't allow to start with 0
-            conversionValue.textChanges()
-                .filter {
-                    it.isNotBlank() && adapterPosition == 0
-                }
-                .subscribe {
-
-                    baseValue.onNext(it.toString().toDouble())
-
-                }.let { disposables.add(it) }
+        fun moveItem(item: Currency) {
+            currencyData.remove(item)
+            currencyData.add(0, item)
+            onItemClicked?.invoke()
+            notifyItemMoved(adapterPosition, 0)
+            notifyItemRangeChanged(0, currencyData.size)
         }
     }
 
@@ -77,17 +70,73 @@ class ConverterAdapter :
         return currencyData.size
     }
 
-    override fun onBindViewHolder(holder: CurrencyViewHolder, position: Int) {
+    override fun getItemViewType(position: Int): Int {
+        return if (position == 0) BASE_CURRENCY_VIEW else SECONDARY_CURRENCY_VIEW
+    }
 
-        Log.e("onBindViewHolder", "$position")
+    override fun onBindViewHolder(holder: CurrencyViewHolder, position: Int) {
 
         val currentItem = currencyData[position]
 
-        holder.currencyCode.text = currentItem.currencyCode
-        holder.conversionValue.apply {
-            isEnabled = position == 0
-            val stringValue = currentItem.relativeRate.toString().removeSuffix(".0")
-            setText(stringValue)
+        with(holder) {
+
+            currencyCode.text = currentItem.currencyCode
+            currencyName.text = currentItem.currencyName
+            currencyFlag.setImageResource(currentItem.flagId)
+            conversionValue.isEnabled = position == 0
+
+            disposables.clear()
+
+            when (getItemViewType(position)) {
+                BASE_CURRENCY_VIEW -> {
+                    disposables.addAll(subscribeToUserInput { value ->
+                        conversionValue.setText(value.second)
+                    },
+                        conversionValue.subscribeToTextChanges { input ->
+                            sharedViewModel.updateUserInput(
+                                Pair(currentItem.currencyCode, input.toString())
+                            )
+                        })
+                }
+                else -> {
+                    itemView.setOnClickListener {
+                        sharedViewModel.updateUserInput(
+                            Pair(currentItem.currencyCode, conversionValue.text.toString())
+                        )
+                        moveItem(currentItem)
+                    }
+                    disposables.add(subscribeToData { data ->
+                        val rate = data[currentItem.currencyCode]?.relativeRate ?: 0.0
+                        conversionValue.setText(rate.toString())
+                    })
+                }
+
+            }
         }
     }
+
+    private inline fun EditText.subscribeToTextChanges(crossinline toExecute: (input: CharSequence) -> Unit): Disposable {
+        return this.textChanges()
+            .subscribe {
+                toExecute.invoke(if (it.isNotBlank()) it else "0.0")
+            }
+    }
+
+    private inline fun subscribeToUserInput(crossinline toExecute: (Pair<String, String>) -> Unit): Disposable {
+        return sharedViewModel.getUserInput()
+            .observeOn(AndroidSchedulers.mainThread())
+            .firstElement()
+            .subscribe { value ->
+                toExecute.invoke(value)
+            }
+    }
+
+    private inline fun subscribeToData(crossinline toExecute: (Map<String, Currency>) -> Unit): Disposable {
+        return sharedViewModel.getCurrencyData()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { data ->
+                toExecute.invoke(data)
+            }
+    }
+
 }
