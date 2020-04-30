@@ -26,16 +26,17 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
         Observable.interval(0, 1, TimeUnit.SECONDS)
             .flatMap {
                 repository.fetchConversionRates()
-                    .flatMapSingle { result ->
+                    .map { result ->
                         Log.e("result", "called")
                         when (result) {
                             is ResultBase.Success -> {
-                                Single.just(result.result.conversionRates)
+                                result.result.conversionRates
                             }
-                            else -> Single.just(mapOf())
+                            else -> mapOf()
                         }
                     }.take(3)
             }
+                //Handle errors = empty maps
             .subscribe(ratesSubject::onNext)
             .let { disposables.add(it) }
     }
