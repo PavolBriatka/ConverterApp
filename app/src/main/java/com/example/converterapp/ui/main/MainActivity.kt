@@ -1,6 +1,7 @@
 package com.example.converterapp.ui.main
 
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.converterapp.R
@@ -30,8 +31,9 @@ class MainActivity : DaggerAppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        setupToolbar()
+
         viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
-        viewModel.fetchCurrencyRates()
 
         rv_currency_list.apply {
 
@@ -45,12 +47,26 @@ class MainActivity : DaggerAppCompatActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        disposables.addAll(subscribeToCurrencyRates())
+    private fun setupToolbar() {
+        supportActionBar.apply {
+            this?.elevation = 0f
+            this?.title = getString(R.string.main_screen_title)
+        }
     }
 
-    private fun subscribeToCurrencyRates(): Disposable {
+    override fun onStart() {
+        super.onStart()
+        viewModel.fetchCurrencyRates()
+        disposables.add(loadCurrencyRates())
+    }
+
+    override fun onStop() {
+        disposables.clear()
+        viewModel.clearSubscriptions()
+        super.onStop()
+    }
+
+    private fun loadCurrencyRates(): Disposable {
         return viewModel.getCurrencyData()
             .observeOn(AndroidSchedulers.mainThread())
             .firstElement()

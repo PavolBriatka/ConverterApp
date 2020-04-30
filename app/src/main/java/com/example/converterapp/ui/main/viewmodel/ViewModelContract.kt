@@ -9,4 +9,5 @@ interface ViewModelContract {
     fun getCurrencyData(): Observable<Map<String, Currency>>
     fun getUserInput(): Observable<Pair<String, String>>
     fun updateUserInput(input: Pair<String, String>)
+    fun clearSubscriptions()
 }

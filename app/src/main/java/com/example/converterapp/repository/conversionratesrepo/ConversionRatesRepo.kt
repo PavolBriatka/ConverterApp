@@ -69,7 +69,8 @@ class ConversionRatesRepo @Inject constructor(
                     .subscribeOn(Schedulers.io())
                     .map { response ->
                         when (response.code()) {
-                            200 -> handleResponseSuccess(response.body())
+                            200 -> {
+                                handleResponseSuccess(response.body())}
                             else -> ResultBase.Error
                         }
                     }
@@ -77,29 +78,13 @@ class ConversionRatesRepo @Inject constructor(
                         ResultBase.Error
                     }
             },
-            fromMemory = { _, _ ->
-               val data = CurrencyMapCache.retrieveData()
-                when {
-                    data.isNotEmpty() -> {
-                        Log.e("MEMORY_DATA", "SUCCESS")
-                        ResultBase.Success(ConversionRatesResult(data))}
-                    else -> null
-                }
-            },
             fromStorage = { _, _ ->
                 val dbData = databaseUtil.retrieveAndConvert()
                 when  {
                     dbData.conversionRates.isNotEmpty() -> {
-                        Log.e("DB_DATA", "SUCCESS")
                         ResultBase.Success(dbData)
                     }
                     else -> null
-                }
-            },
-            toMemory = { _,_, domain ->
-                when(domain) {
-                    is ResultBase.Success ->
-                        CurrencyMapCache.saveData(domain.result.conversionRates)
                 }
             },
             toStorage = { _, _, domain ->

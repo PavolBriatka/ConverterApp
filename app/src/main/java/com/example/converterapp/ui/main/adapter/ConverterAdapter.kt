@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.RequestManager
 import com.example.converterapp.R
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.ui.main.viewmodel.MainViewModel
@@ -15,8 +16,9 @@ import com.mikhaellopez.circularimageview.CircularImageView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import javax.inject.Inject
 
-class ConverterAdapter :
+class ConverterAdapter @Inject constructor(private val glide: RequestManager) :
     RecyclerView.Adapter<ConverterAdapter.CurrencyViewHolder>() {
 
     companion object ViewType {
@@ -43,7 +45,7 @@ class ConverterAdapter :
 
     }
 
-    inner class CurrencyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
+    inner class CurrencyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val currencyFlag: CircularImageView = itemView.findViewById(R.id.iv_currency_flag)
         val currencyCode: TextView = itemView.findViewById(R.id.tv_currency_code)
         val currencyName: TextView = itemView.findViewById(R.id.tv_currency_name)
@@ -90,18 +92,31 @@ class ConverterAdapter :
             when (getItemViewType(position)) {
                 BASE_CURRENCY_VIEW -> {
                     disposables.addAll(subscribeToUserInput { value ->
-                        conversionValue.setText(value.second)
+                        if (conversionValue.text.toString() != value.second) {
+                            conversionValue.tag = "SET"
+                            conversionValue.setText(value.second)
+                        }
                     },
                         conversionValue.subscribeToTextChanges { input ->
-                            sharedViewModel.updateUserInput(
-                                Pair(currentItem.currencyCode, input.toString())
-                            )
+                            if (conversionValue.tag == null) {
+                                sharedViewModel.updateUserInput(
+                                    Pair(
+                                        currentItem.currencyCode,
+                                        input.toString()
+                                    )
+                                )
+                            }
+
+                            conversionValue.tag = null
                         })
                 }
                 else -> {
                     itemView.setOnClickListener {
                         sharedViewModel.updateUserInput(
-                            Pair(currentItem.currencyCode, conversionValue.text.toString())
+                            Pair(
+                                currentItem.currencyCode,
+                                validateClickedItemValue(conversionValue.text.toString())
+                            )
                         )
                         moveItem(currentItem)
                     }
@@ -115,17 +130,38 @@ class ConverterAdapter :
         }
     }
 
+    /*
+     * Transform value of clicked item - if it's zero, the AmountEditText should appear empty
+     * so the user does not have to manually clear "0.0" value.
+     */
+    private fun validateClickedItemValue(itemValue: String): String {
+        return if (itemValue == "0.0" || itemValue == "0,0") "" else itemValue
+    }
+
+    /*
+    * If the user tries to start input with "." or "," (visible on numeric keyboard) the value
+    * is automatically transformed to "0." or "0," - on one hand it prevents the app from crashing,
+    * on the other hand it provides better user experience
+     */
+    private fun validateInputFieldValue(input: CharSequence): CharSequence {
+        return when {
+            input.startsWith(".") -> "0."
+            input.startsWith(",") -> "0,"
+            else -> input
+        }
+    }
+
     private inline fun EditText.subscribeToTextChanges(crossinline toExecute: (input: CharSequence) -> Unit): Disposable {
         return this.textChanges()
+            .skip(1)
             .subscribe {
-                toExecute.invoke(if (it.isNotBlank()) it else "0.0")
+                toExecute.invoke(validateInputFieldValue(it))
             }
     }
 
     private inline fun subscribeToUserInput(crossinline toExecute: (Pair<String, String>) -> Unit): Disposable {
         return sharedViewModel.getUserInput()
             .observeOn(AndroidSchedulers.mainThread())
-            .firstElement()
             .subscribe { value ->
                 toExecute.invoke(value)
             }

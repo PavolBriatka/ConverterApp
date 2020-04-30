@@ -2,7 +2,11 @@ package com.example.converterapp.di
 
 import android.app.Application
 import android.content.Context
+import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestManager
+import com.bumptech.glide.request.RequestOptions
 import com.example.converterapp.BuildConfig
+import com.example.converterapp.R
 import com.example.converterapp.database.AppDatabase
 import com.example.converterapp.utils.DatabaseUtil
 import com.example.converterapp.webservice.EndpointDefinition
@@ -39,6 +43,23 @@ class AppModule {
     @Provides
     fun provideDatabaseUtil(appDatabase: AppDatabase?): DatabaseUtil {
         return DatabaseUtil(appDatabase)
+    }
+
+    @Singleton
+    @Provides
+    fun provideRequestOptions(): RequestOptions {
+        return RequestOptions
+            .placeholderOf(R.drawable.currency_flag_avatar)
+    }
+
+    @Singleton
+    @Provides
+    fun provideGlideInstance(
+        application: Application,
+        requestOptions: RequestOptions
+    ): RequestManager {
+        return Glide.with(application)
+            .setDefaultRequestOptions(requestOptions)
     }
 
     @Singleton

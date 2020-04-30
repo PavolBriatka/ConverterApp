@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Converter App</string>
     <string name="currency_value_hint">" 0"</string>
+    <string name="main_screen_title">Rates</string>
 
     //Currency Names
     <string name="aud_name">Australian Dollar</string>

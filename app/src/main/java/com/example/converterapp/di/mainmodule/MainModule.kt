@@ -1,6 +1,7 @@
 package com.example.converterapp.di.mainmodule
 
 import android.content.Context
+import com.bumptech.glide.RequestManager
 import com.example.converterapp.database.AppDatabase
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesRepo
 import com.example.converterapp.repository.conversionratesrepo.IConversionRatesRepo
@@ -26,8 +27,8 @@ class MainModule {
 
     @MainScope
     @Provides
-    fun provideCurrencyAdapter(): ConverterAdapter {
-        return  ConverterAdapter()
+    fun provideCurrencyAdapter(glide: RequestManager): ConverterAdapter {
+        return  ConverterAdapter(glide)
     }
 
     @MainScope

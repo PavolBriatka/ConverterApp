@@ -1,13 +1,11 @@
 package com.example.converterapp.ui.main.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.converterapp.repository.ResultBase
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.repository.conversionratesrepo.IConversionRatesRepo
 import com.example.converterapp.utils.round
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.BehaviorSubject
@@ -27,14 +25,13 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
             .flatMap {
                 repository.fetchConversionRates()
                     .map { result ->
-                        Log.e("result", "called")
                         when (result) {
                             is ResultBase.Success -> {
                                 result.result.conversionRates
                             }
                             else -> mapOf()
                         }
-                    }.take(3)
+                    }.take(2)
             }
                 //Handle errors = empty maps
             .subscribe(ratesSubject::onNext)
@@ -44,15 +41,24 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
     override fun getCurrencyData(): Observable<Map<String, Currency>> {
         return Observable.combineLatest(getCurrencyRates(), getUserInput(),
             BiFunction<Map<String, Currency>, Pair<String, String>, Map<String, Currency>> { ratesMap, baseCurrency ->
+
                 val baseCurrencyRate = ratesMap[baseCurrency.first]?.relativeRate!!
-                val userInput = baseCurrency.second
+                val userInput = validateInput(baseCurrency.second)
                 val finalData = mutableMapOf<String, Currency>()
+
                 for ((code, currency) in ratesMap) {
                     finalData[code] =
                         currency.copy(relativeRate = ((currency.relativeRate / baseCurrencyRate) * userInput.toDouble()).round(3))
                 }
                 finalData
             })
+    }
+
+    private fun validateInput(input: String): Double {
+        return when {
+            input.isBlank() -> 0.0
+            else -> input.toDouble()
+        }
     }
 
     private fun getCurrencyRates(): Observable<Map<String, Currency>> {
@@ -64,7 +70,10 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
     }
 
     override fun updateUserInput(input: Pair<String, String>) {
-        Log.e("userInput", "${input.first}, ${input.second}")
         userInputSubject.onNext(input)
+    }
+
+    override fun clearSubscriptions() {
+        disposables.clear()
     }
 }
