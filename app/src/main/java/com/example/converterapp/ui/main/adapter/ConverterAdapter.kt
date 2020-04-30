@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.RequestManager
 import com.example.converterapp.R
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.ui.main.viewmodel.MainViewModel
@@ -16,9 +15,8 @@ import com.mikhaellopez.circularimageview.CircularImageView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import javax.inject.Inject
 
-class ConverterAdapter @Inject constructor(private val glide: RequestManager) :
+class ConverterAdapter :
     RecyclerView.Adapter<ConverterAdapter.CurrencyViewHolder>() {
 
     companion object ViewType {
@@ -109,6 +107,7 @@ class ConverterAdapter @Inject constructor(private val glide: RequestManager) :
 
                             conversionValue.tag = null
                         })
+                    conversionValue.requestFocus()
                 }
                 else -> {
                     itemView.setOnClickListener {

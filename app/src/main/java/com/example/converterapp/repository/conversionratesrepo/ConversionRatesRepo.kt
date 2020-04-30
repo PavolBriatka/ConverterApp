@@ -1,6 +1,5 @@
 package com.example.converterapp.repository.conversionratesrepo
 
-import android.util.Log
 import com.example.converterapp.repository.ResultBase
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.utils.CurrencyHelper

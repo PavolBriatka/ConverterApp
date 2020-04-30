@@ -27,8 +27,8 @@ class MainModule {
 
     @MainScope
     @Provides
-    fun provideCurrencyAdapter(glide: RequestManager): ConverterAdapter {
-        return  ConverterAdapter(glide)
+    fun provideCurrencyAdapter(): ConverterAdapter {
+        return  ConverterAdapter()
     }
 
     @MainScope

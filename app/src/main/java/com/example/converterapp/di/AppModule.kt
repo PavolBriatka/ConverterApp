@@ -47,23 +47,6 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideRequestOptions(): RequestOptions {
-        return RequestOptions
-            .placeholderOf(R.drawable.currency_flag_avatar)
-    }
-
-    @Singleton
-    @Provides
-    fun provideGlideInstance(
-        application: Application,
-        requestOptions: RequestOptions
-    ): RequestManager {
-        return Glide.with(application)
-            .setDefaultRequestOptions(requestOptions)
-    }
-
-    @Singleton
-    @Provides
     fun provideOkHttpClientBuilder(): OkHttpClient.Builder {
         return OkHttpClient.Builder()
             .readTimeout(30, TimeUnit.SECONDS)
