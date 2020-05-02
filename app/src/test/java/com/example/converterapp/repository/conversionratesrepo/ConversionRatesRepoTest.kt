@@ -1,15 +1,17 @@
 package com.example.converterapp.repository.conversionratesrepo
 
 import com.example.converterapp.repository.ResultBase
+import com.example.converterapp.utils.ICurrencyHelper
+import com.example.converterapp.utils.IDatabaseUtil
 import com.example.converterapp.webservice.conversionratesinteractor.ConversionRatesResponseModel
 import com.example.converterapp.webservice.conversionratesinteractor.IConversionRatesInteractor
 import com.nhaarman.mockito_kotlin.argumentCaptor
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.verify
-import io.reactivex.Observable
+import io.reactivex.Single
 import okhttp3.MediaType
 import okhttp3.ResponseBody
-import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyString
@@ -26,6 +28,12 @@ class ConversionRatesRepoTest {
     @Mock
     lateinit var interactor: IConversionRatesInteractor
 
+    @Mock
+    lateinit var databaseUtil: IDatabaseUtil
+
+    @Mock
+    lateinit var currencyHelper: ICurrencyHelper
+
     @InjectMocks
     lateinit var repository: ConversionRatesRepo
 
@@ -34,7 +42,7 @@ class ConversionRatesRepoTest {
         //Arrange
         resultSuccess()
         //Act
-        repository.fetchConversionRates()
+        repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
         //Assert
         argumentCaptor<String>().apply {
             verify(interactor).fetchConversionRates(capture())
@@ -45,9 +53,10 @@ class ConversionRatesRepoTest {
     @Test
     fun fetchRates_responseSuccess_listOfRatesReturned() {
         //Arrange
+        currencyHelperResponse()
         resultSuccess()
         //Act
-        var result = repository.fetchConversionRates().blockingFirst()
+        var result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
         //Assert
         assert(result is ResultBase.Success)
         result = result as ResultBase.Success
@@ -55,24 +64,11 @@ class ConversionRatesRepoTest {
     }
 
     @Test
-    fun fetchRates_responseSuccess_baseCurrencyOnTopOfTheList() {
-        //Arrange
-        resultSuccess()
-        //Act
-        var result = repository.fetchConversionRates().blockingFirst()
-        //Assert
-        assert(result is ResultBase.Success)
-        result = result as ResultBase.Success
-        assert(result.result.conversionRates[0].currencyCode == "EUR")
-        assert(result.result.conversionRates[0].relativeRate == 1.0)
-    }
-
-    @Test
     fun fetchRates_responseSuccessDataNull_errorReceived() {
         //Arrange
         resultSuccessDataNull()
         //Act
-        val result = repository.fetchConversionRates().blockingFirst()
+        val result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
         //Assert
         assert(result is ResultBase.Error)
     }
@@ -82,7 +78,7 @@ class ConversionRatesRepoTest {
         //Arrange
         resultSuccessBaseCurrencyNullOrEmpty()
         //Act
-        val result = repository.fetchConversionRates().blockingFirst()
+        val result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
         //Assert
         assert(result is ResultBase.Error)
     }
@@ -92,7 +88,7 @@ class ConversionRatesRepoTest {
         //Arrange
         resultSuccessRatesNull()
         //Act
-        val result = repository.fetchConversionRates().blockingFirst()
+        val result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
         //Assert
         assert(result is ResultBase.Error)
     }
@@ -102,29 +98,36 @@ class ConversionRatesRepoTest {
         //Arrange
         resultResponseError()
         //Act
-        val result = repository.fetchConversionRates().blockingFirst()
+        val result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
         //Assert
         assert(result is ResultBase.Error)
     }
 
+    @Ignore("revise")
     @Test(expected = UnknownHostException::class)
     fun fetchRates_errorThrown_errorReceived() {
         //Arrange
         resultErrorThrown()
         //Act
-        val result = repository.fetchConversionRates().blockingFirst()
+        val result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
         //Assert
         assert(result is ResultBase.Error)
     }
 
     //region Helpers
+    private fun currencyHelperResponse() {
+        Mockito.`when`(currencyHelper.fetchResources(anyString())).thenReturn(
+            Pair("Euro", 1)
+        )
+    }
+
     private fun resultSuccess() {
         Mockito.`when`(interactor.fetchConversionRates(anyString())).thenReturn(
-            Observable.just(
+            Single.just(
                 Response.success(
                     ConversionRatesResponseModel(
                         baseCurrency = "EUR",
-                        rates = mapOf("GBP" to 1.5, "CZK" to 25.45, "DKK" to 15.75)
+                        rates = mutableMapOf("GBP" to 1.5, "CZK" to 25.45, "DKK" to 15.75)
                     )
                 )
             )
@@ -134,7 +137,7 @@ class ConversionRatesRepoTest {
     private fun resultSuccessDataNull() {
         val response: ConversionRatesResponseModel? = null
         Mockito.`when`(interactor.fetchConversionRates(anyString())).thenReturn(
-            Observable.just(
+            Single.just(
                 Response.success(response)
             )
         )
@@ -142,11 +145,11 @@ class ConversionRatesRepoTest {
 
     private fun resultSuccessBaseCurrencyNullOrEmpty() {
         Mockito.`when`(interactor.fetchConversionRates(anyString())).thenReturn(
-            Observable.just(
+            Single.just(
                 Response.success(
                     ConversionRatesResponseModel(
                         baseCurrency = null,
-                        rates = mapOf("GBP" to 1.5, "CZK" to 25.45, "DKK" to 15.75)
+                        rates = mutableMapOf("GBP" to 1.5, "CZK" to 25.45, "DKK" to 15.75)
                     )
                 )
             )
@@ -155,7 +158,7 @@ class ConversionRatesRepoTest {
 
     private fun resultSuccessRatesNull() {
         Mockito.`when`(interactor.fetchConversionRates(anyString())).thenReturn(
-            Observable.just(
+            Single.just(
                 Response.success(
                     ConversionRatesResponseModel(
                         baseCurrency = "EUR",
@@ -168,7 +171,7 @@ class ConversionRatesRepoTest {
 
     private fun resultResponseError() {
         Mockito.`when`(interactor.fetchConversionRates(anyString())).thenReturn(
-            Observable.just(
+            Single.just(
                 Response.error(
                     400, ResponseBody.create(
                         MediaType.parse("text"),

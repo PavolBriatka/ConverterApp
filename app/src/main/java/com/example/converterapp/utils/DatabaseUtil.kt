@@ -6,9 +6,9 @@ import com.example.converterapp.repository.conversionratesrepo.ConversionRatesRe
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import javax.inject.Inject
 
-class DatabaseUtil @Inject constructor(private val appDatabase: AppDatabase?) {
+class DatabaseUtil @Inject constructor(private val appDatabase: AppDatabase?) : IDatabaseUtil {
 
-    fun convertAndSave(data: ConversionRatesResult) {
+    override fun convertAndSave(data: ConversionRatesResult) {
 
         appDatabase?.let { database ->
             val dao = database.currencyDao()
@@ -27,11 +27,12 @@ class DatabaseUtil @Inject constructor(private val appDatabase: AppDatabase?) {
         }
     }
 
-    fun retrieveAndConvert(): ConversionRatesResult {
+    override fun retrieveAndConvert(): ConversionRatesResult {
 
         appDatabase?.let { database ->
             val dao = database.currencyDao()
-            val convertedData = convertEntity(dao.retrieveCurrencies()).associateBy { it.currencyCode }
+            val convertedData =
+                convertEntity(dao.retrieveCurrencies()).associateBy { it.currencyCode }
 
             return ConversionRatesResult(convertedData)
         }

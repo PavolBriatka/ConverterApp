@@ -1,11 +1,11 @@
 package com.example.converterapp.ui.main
 
 import android.os.Bundle
-import android.util.Log
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.converterapp.R
 import com.example.converterapp.di.viewmodelfactory.ViewModelsProviderFactory
+import com.example.converterapp.ui.ConnectivityObservable
 import com.example.converterapp.ui.main.adapter.ConverterAdapter
 import com.example.converterapp.ui.main.viewmodel.MainViewModel
 import com.example.converterapp.utils.mapToArray
@@ -20,8 +20,12 @@ class MainActivity : DaggerAppCompatActivity() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelsProviderFactory
+
     @Inject
     lateinit var converterAdapter: ConverterAdapter
+
+    @Inject
+    lateinit var connectivityObservable: ConnectivityObservable
 
     private lateinit var viewModel: MainViewModel
     private val disposables = CompositeDisposable()
@@ -43,7 +47,6 @@ class MainActivity : DaggerAppCompatActivity() {
             converterAdapter.onItemClicked = {
                 this.scrollToPosition(0)
             }
-
         }
     }
 
@@ -56,14 +59,30 @@ class MainActivity : DaggerAppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.fetchCurrencyRates()
-        disposables.add(loadCurrencyRates())
+        connectivityObservable.registerNetworkStateObserver()
+        disposables.addAll(
+            loadCurrencyRates(),
+            observeErrorNotification(),
+            observeNetworkStatus()
+        )
     }
 
     override fun onStop() {
         disposables.clear()
         viewModel.clearSubscriptions()
+        connectivityObservable.unregisterNetworkStateObserver()
         super.onStop()
+    }
+
+    private fun observeNetworkStatus(): Disposable {
+        return connectivityObservable.networkState()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { isAvailable ->
+
+                viewModel.clearSubscriptions()
+                viewModel.fetchCurrencyRates(isAvailable)
+
+            }
     }
 
     private fun loadCurrencyRates(): Disposable {
@@ -75,5 +94,13 @@ class MainActivity : DaggerAppCompatActivity() {
                 rv_currency_list.adapter = converterAdapter
             }
 
+    }
+
+    private fun observeErrorNotification(): Disposable {
+        return viewModel.getErrorNotification()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+
+            }
     }
 }

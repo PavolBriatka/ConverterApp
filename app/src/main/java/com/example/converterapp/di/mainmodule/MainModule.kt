@@ -1,42 +1,39 @@
 package com.example.converterapp.di.mainmodule
 
 import android.content.Context
-import com.bumptech.glide.RequestManager
-import com.example.converterapp.database.AppDatabase
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesRepo
 import com.example.converterapp.repository.conversionratesrepo.IConversionRatesRepo
 import com.example.converterapp.ui.main.adapter.ConverterAdapter
 import com.example.converterapp.utils.CurrencyHelper
-import com.example.converterapp.utils.DatabaseUtil
+import com.example.converterapp.utils.ICurrencyHelper
+import com.example.converterapp.utils.IDatabaseUtil
 import com.example.converterapp.webservice.EndpointDefinition
 import com.example.converterapp.webservice.conversionratesinteractor.ConversionRatesInteractor
 import com.example.converterapp.webservice.conversionratesinteractor.IConversionRatesInteractor
 import dagger.Module
 import dagger.Provides
-import retrofit2.Converter
 
 @Module
 class MainModule {
 
     @MainScope
     @Provides
-    fun provideCurrencyHelper(context: Context): CurrencyHelper {
+    fun provideCurrencyHelper(context: Context): ICurrencyHelper {
         return CurrencyHelper(context)
     }
-
 
     @MainScope
     @Provides
     fun provideCurrencyAdapter(): ConverterAdapter {
-        return  ConverterAdapter()
+        return ConverterAdapter()
     }
 
     @MainScope
     @Provides
     fun provideConversionRatesRepo(
         interactor: IConversionRatesInteractor,
-        currencyHelper: CurrencyHelper,
-        databaseUtil: DatabaseUtil
+        currencyHelper: ICurrencyHelper,
+        databaseUtil: IDatabaseUtil
     ): IConversionRatesRepo {
         return ConversionRatesRepo(interactor, currencyHelper, databaseUtil)
     }

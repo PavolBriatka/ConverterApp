@@ -2,13 +2,11 @@ package com.example.converterapp.di
 
 import android.app.Application
 import android.content.Context
-import com.bumptech.glide.Glide
-import com.bumptech.glide.RequestManager
-import com.bumptech.glide.request.RequestOptions
 import com.example.converterapp.BuildConfig
-import com.example.converterapp.R
 import com.example.converterapp.database.AppDatabase
+import com.example.converterapp.ui.ConnectivityObservable
 import com.example.converterapp.utils.DatabaseUtil
+import com.example.converterapp.utils.IDatabaseUtil
 import com.example.converterapp.webservice.EndpointDefinition
 import dagger.Module
 import dagger.Provides
@@ -35,13 +33,19 @@ class AppModule {
 
     @Singleton
     @Provides
+    fun provideConnectivityObservable(application: Application): ConnectivityObservable {
+        return ConnectivityObservable(application)
+    }
+
+    @Singleton
+    @Provides
     fun provideAppDatabase(context: Context): AppDatabase? {
         return AppDatabase.getDatabase(context)
     }
 
     @Singleton
     @Provides
-    fun provideDatabaseUtil(appDatabase: AppDatabase?): DatabaseUtil {
+    fun provideDatabaseUtil(appDatabase: AppDatabase?): IDatabaseUtil {
         return DatabaseUtil(appDatabase)
     }
 

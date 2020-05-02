@@ -3,9 +3,9 @@ package com.example.converterapp.utils
 import android.content.Context
 import com.example.converterapp.R
 
-class CurrencyHelper(context: Context) {
+class CurrencyHelper(context: Context) : ICurrencyHelper {
 
-    val currencyMap = mapOf(
+    private val currencyMap = mapOf(
 
         Pair("AUD", Pair(context.getString(R.string.aud_name), R.drawable.flag_australia)),
         Pair("BGN", Pair(context.getString(R.string.bgn_name), R.drawable.flag_bulgaria)),
@@ -41,4 +41,8 @@ class CurrencyHelper(context: Context) {
         Pair("ZAR", Pair(context.getString(R.string.zar_name), R.drawable.flag_south_africa))
 
     )
+
+    override fun fetchResources(code: String): Pair<String, Int>? {
+        return currencyMap[code]
+    }
 }

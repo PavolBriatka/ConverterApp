@@ -1,9 +1,10 @@
 package com.example.converterapp.repository.conversionratesrepo
 
+import android.util.Log
 import com.example.converterapp.repository.ResultBase
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
-import com.example.converterapp.utils.CurrencyHelper
-import com.example.converterapp.utils.DatabaseUtil
+import com.example.converterapp.utils.ICurrencyHelper
+import com.example.converterapp.utils.IDatabaseUtil
 import com.example.converterapp.utils.extractData
 import com.example.converterapp.webservice.conversionratesinteractor.ConversionRatesResponseModel
 import com.example.converterapp.webservice.conversionratesinteractor.IConversionRatesInteractor
@@ -14,15 +15,35 @@ import javax.inject.Inject
 
 class ConversionRatesRepo @Inject constructor(
     private val interactor: IConversionRatesInteractor,
-    private val currencyHelper: CurrencyHelper,
-    private val databaseUtil: DatabaseUtil
+    private val currencyHelper: ICurrencyHelper,
+    private val databaseUtil: IDatabaseUtil
 ) :
     IConversionRatesRepo {
 
-    override fun fetchConversionRates(baseCurrency: String):
-            Observable<ResultBase<ConversionRatesResult>> =
-        currencyRatesDod.observe(baseCurrency).extractData()
+    override fun fetchConversionRates(baseCurrency: String, isNetworkAvailable: Boolean):
+            Observable<ResultBase<ConversionRatesResult>> {
+        return if (isNetworkAvailable) {
+            //Log.e("Network", "fetch")
+            currencyRatesDod.observe(baseCurrency).extractData()
+        } else {
+            //Log.e("Database", "fetch")
+            fetchConversionRatesFromDatabase()
+        }
+    }
 
+
+    private fun fetchConversionRatesFromDatabase(): Observable<ResultBase<ConversionRatesResult>> {
+        return Observable.fromCallable {
+            val dbData = databaseUtil.retrieveAndConvert()
+            when {
+                dbData.conversionRates.isNotEmpty() -> {
+                    ResultBase.Success(dbData)
+                }
+                else -> ResultBase.Error
+            }
+        }.subscribeOn(Schedulers.io())
+
+    }
 
     private fun handleResponseSuccess(responseBody: ConversionRatesResponseModel?): ResultBase<ConversionRatesResult> {
         responseBody?.let { data ->
@@ -40,18 +61,20 @@ class ConversionRatesRepo @Inject constructor(
         data.baseCurrency?.let {
             data.rates?.let {
                 //1. Add base currency
+                val baseCurrencyRes = currencyHelper.fetchResources(data.baseCurrency)
                 currencyRates[data.baseCurrency] = Currency(
                     currencyCode = data.baseCurrency,
-                    currencyName = currencyHelper.currencyMap[data.baseCurrency]?.first!!,
-                    flagId = currencyHelper.currencyMap[data.baseCurrency]?.second!!,
+                    currencyName = baseCurrencyRes?.first!!,
+                    flagId = baseCurrencyRes.second,
                     relativeRate = 1.0
                 )
                 //2. Add rest of the currencies
                 for ((code, rate) in data.rates) {
+                    val currencyRes = currencyHelper.fetchResources(code)
                     currencyRates[code] = Currency(
                         currencyCode = code,
-                        currencyName = currencyHelper.currencyMap[code]?.first!!,
-                        flagId = currencyHelper.currencyMap[code]?.second!!,
+                        currencyName = currencyRes?.first!!,
+                        flagId = currencyRes.second,
                         relativeRate = rate
                     )
                 }
@@ -69,22 +92,14 @@ class ConversionRatesRepo @Inject constructor(
                     .map { response ->
                         when (response.code()) {
                             200 -> {
-                                handleResponseSuccess(response.body())}
+                                handleResponseSuccess(response.body())
+                            }
                             else -> ResultBase.Error
                         }
                     }
                     .onErrorReturn {
                         ResultBase.Error
                     }
-            },
-            fromStorage = { _, _ ->
-                val dbData = databaseUtil.retrieveAndConvert()
-                when  {
-                    dbData.conversionRates.isNotEmpty() -> {
-                        ResultBase.Success(dbData)
-                    }
-                    else -> null
-                }
             },
             toStorage = { _, _, domain ->
                 when (domain) {
@@ -94,5 +109,5 @@ class ConversionRatesRepo @Inject constructor(
                 }
             }
 
-            )
+        )
 }

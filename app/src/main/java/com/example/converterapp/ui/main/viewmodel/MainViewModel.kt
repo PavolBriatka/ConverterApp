@@ -9,6 +9,7 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -16,24 +17,34 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
     ViewModelContract {
 
     private val ratesSubject: BehaviorSubject<Map<String, Currency>> = BehaviorSubject.create()
-    private val userInputSubject: BehaviorSubject<Pair<String, String>> =
+    private val baseCurrencySubject: BehaviorSubject<Pair<String, String>> =
         BehaviorSubject.createDefault(Pair("EUR", "1"))
+    private val dataErrorSubject: PublishSubject<Boolean> = PublishSubject.create()
     private val disposables = CompositeDisposable()
 
-    override fun fetchCurrencyRates() {
+    override fun fetchCurrencyRates(isNetworkAvailable: Boolean) {
         Observable.interval(0, 1, TimeUnit.SECONDS)
             .flatMap {
-                repository.fetchConversionRates()
+                repository.fetchConversionRates(isNetworkAvailable = isNetworkAvailable)
                     .map { result ->
                         when (result) {
                             is ResultBase.Success -> {
+                                //Log.e("Success", "${result.result.conversionRates.size}")
                                 result.result.conversionRates
                             }
-                            else -> mapOf()
+                            else -> {
+                                //Log.e("ERROR", "EMPTY")
+                                mapOf()
+                            }
                         }
-                    }.take(2)
+                    }.take(1)
             }
-                //Handle errors = empty maps
+            .doOnNext {
+                if (it.isEmpty()) {
+                    dataErrorSubject.onNext(true)
+                }
+            }
+            .filter { it.isNotEmpty() }
             .subscribe(ratesSubject::onNext)
             .let { disposables.add(it) }
     }
@@ -48,7 +59,10 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
 
                 for ((code, currency) in ratesMap) {
                     finalData[code] =
-                        currency.copy(relativeRate = ((currency.relativeRate / baseCurrencyRate) * userInput.toDouble()).round(3))
+                        currency.copy(
+                            relativeRate =
+                            ((currency.relativeRate / baseCurrencyRate) * userInput).round(3)
+                        )
                 }
                 finalData
             })
@@ -66,11 +80,15 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
     }
 
     override fun getUserInput(): Observable<Pair<String, String>> {
-        return userInputSubject.hide()
+        return baseCurrencySubject.hide()
     }
 
     override fun updateUserInput(input: Pair<String, String>) {
-        userInputSubject.onNext(input)
+        baseCurrencySubject.onNext(input)
+    }
+
+    override fun getErrorNotification(): Observable<Boolean> {
+        return dataErrorSubject.hide()
     }
 
     override fun clearSubscriptions() {
