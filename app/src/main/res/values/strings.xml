@@ -39,4 +39,6 @@
     <string name="main_screen_title">Rates</string>
     <string name="response_error_message">There seems to be an issue.
         Please check your Internet connection or try again later.</string>
+    <string name="no_data_screen_message">There seems to be an issue fetching latest rates.\n
+        Please check your Internet connection or try again later.</string>
 </resources>

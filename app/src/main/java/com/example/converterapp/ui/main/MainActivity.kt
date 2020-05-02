@@ -2,6 +2,7 @@ package com.example.converterapp.ui.main
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -107,8 +108,10 @@ class MainActivity : DaggerAppCompatActivity() {
             .filter { it.isNotEmpty() }
             .firstElement()
             .subscribe { data ->
+                ll_no_data_screen.visibility = View.GONE
                 converterAdapter.setData(data.mapToArray())
                 rv_currency_list.adapter = converterAdapter
+
             }
 
     }
@@ -118,7 +121,8 @@ class MainActivity : DaggerAppCompatActivity() {
             .observeOn(AndroidSchedulers.mainThread())
             .filter { it }
             .subscribe {
-                Log.e("isComing", "yes")
+                ll_no_data_screen.visibility =
+                    if (converterAdapter.hasData()) View.GONE else View.VISIBLE
                 snackbar.show()
             }
     }
