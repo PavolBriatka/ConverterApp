@@ -1,12 +1,14 @@
-package com.example.converterapp.utils
+package com.example.converterapp.utils.databaseutil
 
 import com.example.converterapp.database.AppDatabase
 import com.example.converterapp.database.CurrencyEntity
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
+import com.example.converterapp.utils.mapToArray
 import javax.inject.Inject
 
-class DatabaseUtil @Inject constructor(private val appDatabase: AppDatabase?) : IDatabaseUtil {
+class DatabaseUtil @Inject constructor(private val appDatabase: AppDatabase?) :
+    IDatabaseUtil {
 
     override fun convertAndSave(data: ConversionRatesResult) {
 

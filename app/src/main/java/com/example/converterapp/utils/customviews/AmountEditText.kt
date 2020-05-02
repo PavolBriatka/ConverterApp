@@ -1,4 +1,4 @@
-package com.example.converterapp.utils
+package com.example.converterapp.utils.customviews
 
 import android.content.Context
 import android.util.AttributeSet

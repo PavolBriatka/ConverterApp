@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.converterapp.R
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.ui.main.viewmodel.MainViewModel
-import com.example.converterapp.utils.AmountEditText
+import com.example.converterapp.utils.customviews.AmountEditText
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.mikhaellopez.circularimageview.CircularImageView
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -41,6 +41,10 @@ class ConverterAdapter :
             notifyDataSetChanged()
         }
 
+    }
+
+    fun hasData(): Boolean {
+        return currencyData.isNotEmpty()
     }
 
     inner class CurrencyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

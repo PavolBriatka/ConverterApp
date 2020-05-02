@@ -1,8 +1,8 @@
 package com.example.converterapp.repository.conversionratesrepo
 
 import com.example.converterapp.repository.ResultBase
-import com.example.converterapp.utils.ICurrencyHelper
-import com.example.converterapp.utils.IDatabaseUtil
+import com.example.converterapp.utils.currencyhelper.ICurrencyHelper
+import com.example.converterapp.utils.databaseutil.IDatabaseUtil
 import com.example.converterapp.webservice.conversionratesinteractor.ConversionRatesResponseModel
 import com.example.converterapp.webservice.conversionratesinteractor.IConversionRatesInteractor
 import com.nhaarman.mockito_kotlin.argumentCaptor

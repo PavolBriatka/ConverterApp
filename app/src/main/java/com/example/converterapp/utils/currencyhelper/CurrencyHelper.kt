@@ -1,9 +1,11 @@
-package com.example.converterapp.utils
+package com.example.converterapp.utils.currencyhelper
 
 import android.content.Context
 import com.example.converterapp.R
+import com.example.converterapp.utils.currencyhelper.ICurrencyHelper
 
-class CurrencyHelper(context: Context) : ICurrencyHelper {
+class CurrencyHelper(context: Context) :
+    ICurrencyHelper {
 
     private val currencyMap = mapOf(
 

@@ -1,10 +1,9 @@
 package com.example.converterapp.repository.conversionratesrepo
 
-import android.util.Log
 import com.example.converterapp.repository.ResultBase
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
-import com.example.converterapp.utils.ICurrencyHelper
-import com.example.converterapp.utils.IDatabaseUtil
+import com.example.converterapp.utils.currencyhelper.ICurrencyHelper
+import com.example.converterapp.utils.databaseutil.IDatabaseUtil
 import com.example.converterapp.utils.extractData
 import com.example.converterapp.webservice.conversionratesinteractor.ConversionRatesResponseModel
 import com.example.converterapp.webservice.conversionratesinteractor.IConversionRatesInteractor
@@ -91,15 +90,22 @@ class ConversionRatesRepo @Inject constructor(
                     .subscribeOn(Schedulers.io())
                     .map { response ->
                         when (response.code()) {
-                            200 -> {
-                                handleResponseSuccess(response.body())
-                            }
+                            200 -> handleResponseSuccess(response.body())
                             else -> ResultBase.Error
                         }
                     }
                     .onErrorReturn {
                         ResultBase.Error
                     }
+            },
+            fromStorage = {_, _ ->
+                val dbData = databaseUtil.retrieveAndConvert()
+                when {
+                    dbData.conversionRates.isNotEmpty() -> {
+                        ResultBase.Success(dbData)
+                    }
+                    else -> ResultBase.Error
+                }
             },
             toStorage = { _, _, domain ->
                 when (domain) {

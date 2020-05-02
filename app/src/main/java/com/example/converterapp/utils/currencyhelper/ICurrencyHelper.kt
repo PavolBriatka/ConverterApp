@@ -1,4 +1,4 @@
-package com.example.converterapp.utils
+package com.example.converterapp.utils.currencyhelper
 
 interface ICurrencyHelper {
 

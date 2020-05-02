@@ -1,4 +1,4 @@
-package com.example.converterapp.utils
+package com.example.converterapp.utils.databaseutil
 
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult
 

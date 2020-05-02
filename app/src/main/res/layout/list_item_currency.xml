@@ -55,7 +55,7 @@
             tools:text="Euro" />
     </LinearLayout>
 
-    <com.example.converterapp.utils.AmountEditText
+    <com.example.converterapp.utils.customviews.AmountEditText
         android:id="@+id/et_currency_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -1,6 +1,8 @@
 package com.example.converterapp.ui.main
 
 import android.os.Bundle
+import android.util.Log
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.converterapp.R
@@ -9,6 +11,7 @@ import com.example.converterapp.ui.ConnectivityObservable
 import com.example.converterapp.ui.main.adapter.ConverterAdapter
 import com.example.converterapp.ui.main.viewmodel.MainViewModel
 import com.example.converterapp.utils.mapToArray
+import com.google.android.material.snackbar.Snackbar
 import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -28,6 +31,7 @@ class MainActivity : DaggerAppCompatActivity() {
     lateinit var connectivityObservable: ConnectivityObservable
 
     private lateinit var viewModel: MainViewModel
+    private lateinit var snackbar: Snackbar
     private val disposables = CompositeDisposable()
 
 
@@ -36,6 +40,7 @@ class MainActivity : DaggerAppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         setupToolbar()
+        setupSnackbar()
 
         viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
 
@@ -48,6 +53,16 @@ class MainActivity : DaggerAppCompatActivity() {
                 this.scrollToPosition(0)
             }
         }
+    }
+
+    private fun setupSnackbar() {
+        snackbar = Snackbar.make(
+            cl_main_activity,
+            getString(R.string.response_error_message),
+            5000
+        )
+        val view = snackbar.view
+        view.setBackgroundColor(ContextCompat.getColor(this, R.color.snackbarBackgorund))
     }
 
     private fun setupToolbar() {
@@ -82,12 +97,14 @@ class MainActivity : DaggerAppCompatActivity() {
                 viewModel.clearSubscriptions()
                 viewModel.fetchCurrencyRates(isAvailable)
 
+                if (!isAvailable) snackbar.show()
             }
     }
 
     private fun loadCurrencyRates(): Disposable {
         return viewModel.getCurrencyData()
             .observeOn(AndroidSchedulers.mainThread())
+            .filter { it.isNotEmpty() }
             .firstElement()
             .subscribe { data ->
                 converterAdapter.setData(data.mapToArray())
@@ -99,8 +116,10 @@ class MainActivity : DaggerAppCompatActivity() {
     private fun observeErrorNotification(): Disposable {
         return viewModel.getErrorNotification()
             .observeOn(AndroidSchedulers.mainThread())
+            .filter { it }
             .subscribe {
-
+                Log.e("isComing", "yes")
+                snackbar.show()
             }
     }
 }

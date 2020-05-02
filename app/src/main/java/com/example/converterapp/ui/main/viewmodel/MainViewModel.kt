@@ -37,11 +37,13 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
                                 mapOf()
                             }
                         }
-                    }.take(1)
+                    }.take(2)
             }
             .doOnNext {
                 if (it.isEmpty()) {
                     dataErrorSubject.onNext(true)
+                } else {
+                    dataErrorSubject.onNext(false)
                 }
             }
             .filter { it.isNotEmpty() }
@@ -88,7 +90,7 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
     }
 
     override fun getErrorNotification(): Observable<Boolean> {
-        return dataErrorSubject.hide()
+        return dataErrorSubject.distinct().hide()
     }
 
     override fun clearSubscriptions() {

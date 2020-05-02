@@ -5,8 +5,8 @@ import android.content.Context
 import com.example.converterapp.BuildConfig
 import com.example.converterapp.database.AppDatabase
 import com.example.converterapp.ui.ConnectivityObservable
-import com.example.converterapp.utils.DatabaseUtil
-import com.example.converterapp.utils.IDatabaseUtil
+import com.example.converterapp.utils.databaseutil.DatabaseUtil
+import com.example.converterapp.utils.databaseutil.IDatabaseUtil
 import com.example.converterapp.webservice.EndpointDefinition
 import dagger.Module
 import dagger.Provides

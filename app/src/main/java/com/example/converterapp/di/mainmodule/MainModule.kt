@@ -4,9 +4,9 @@ import android.content.Context
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesRepo
 import com.example.converterapp.repository.conversionratesrepo.IConversionRatesRepo
 import com.example.converterapp.ui.main.adapter.ConverterAdapter
-import com.example.converterapp.utils.CurrencyHelper
-import com.example.converterapp.utils.ICurrencyHelper
-import com.example.converterapp.utils.IDatabaseUtil
+import com.example.converterapp.utils.currencyhelper.CurrencyHelper
+import com.example.converterapp.utils.currencyhelper.ICurrencyHelper
+import com.example.converterapp.utils.databaseutil.IDatabaseUtil
 import com.example.converterapp.webservice.EndpointDefinition
 import com.example.converterapp.webservice.conversionratesinteractor.ConversionRatesInteractor
 import com.example.converterapp.webservice.conversionratesinteractor.IConversionRatesInteractor

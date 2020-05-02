@@ -3,4 +3,6 @@
     <color name="colorPrimary">#fff</color>
     <color name="colorPrimaryDark">#b3b3b3</color>
     <color name="colorAccent">#448AFF</color>
+
+    <color name="snackbarBackgorund">#fbb13b</color>
 </resources>
