@@ -124,8 +124,11 @@ class ConverterAdapter :
                         moveItem(currentItem)
                     }
                     disposables.add(subscribeToData { data ->
-                        val rate = data[currentItem.currencyCode]?.relativeRate ?: 0.0
-                        conversionValue.setText(rate.toString())
+                        val value = data[currentItem.currencyCode]?.relativeRate ?: 0.0
+                        var stringValue = String.format("%.2f", value)
+                        if (stringValue.endsWith(".00")) stringValue = stringValue.dropLast(3)
+
+                        conversionValue.setText(stringValue)
                     })
                 }
 
@@ -144,10 +147,16 @@ class ConverterAdapter :
     /*
     * If the user tries to start input with "." or "," (visible on numeric keyboard) the value
     * is automatically transformed to "0." or "0," - on one hand it prevents the app from crashing,
-    * on the other hand it provides better user experience
-     */
+    * on the other hand it provides better user experience.
+    * Similarly, when the user starts with zero followed number and not by decimal point,
+    * drop the zero in the front.
+    */
     private fun validateInputFieldValue(input: CharSequence): CharSequence {
         return when {
+            input.length >= 2 &&
+            input.startsWith("0") &&
+            !input.startsWith("0.") &&
+            !input.startsWith("0,") -> input.substring(1, input.length)
             input.startsWith(".") -> "0."
             input.startsWith(",") -> "0,"
             else -> input

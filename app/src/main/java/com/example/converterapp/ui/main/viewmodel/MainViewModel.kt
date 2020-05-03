@@ -1,5 +1,6 @@
 package com.example.converterapp.ui.main.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.converterapp.repository.ResultBase
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
@@ -63,7 +64,7 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
                     finalData[code] =
                         currency.copy(
                             relativeRate =
-                            ((currency.relativeRate / baseCurrencyRate) * userInput).round(3)
+                            ((currency.relativeRate / baseCurrencyRate) * userInput).round(2)
                         )
                 }
                 finalData
