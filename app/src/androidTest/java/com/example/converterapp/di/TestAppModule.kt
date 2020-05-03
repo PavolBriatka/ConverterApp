@@ -1,6 +1,7 @@
 package com.example.converterapp.di
 
-import com.example.converterapp.repository.FakeConversionRatesRepo
+import android.app.Application
+import com.example.converterapp.TestBaseApplication
 import com.example.converterapp.repository.conversionratesrepo.IConversionRatesRepo
 import com.example.converterapp.ui.FakeConnectivityObservable
 import com.example.converterapp.ui.IConnectivityObervable
@@ -26,7 +27,7 @@ class TestAppModule {
 
     @Singleton
     @Provides
-    fun provideConversionRatesRepo(): IConversionRatesRepo {
-        return FakeConversionRatesRepo()
+    fun provideConversionRatesRepo(application: Application): IConversionRatesRepo {
+        return (application as TestBaseApplication).fakeRepo
     }
 }

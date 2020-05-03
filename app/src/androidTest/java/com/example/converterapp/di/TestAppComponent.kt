@@ -1,10 +1,7 @@
 package com.example.converterapp.di
 
 import android.app.Application
-import com.example.converterapp.BaseApplication
 import com.example.converterapp.TestBaseApplication
-import com.example.converterapp.di.viewmodelfactory.ViewModelFactoryModule
-import com.example.converterapp.repository.FakeConversionRatesRepo
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjector
@@ -18,7 +15,7 @@ import javax.inject.Singleton
         TestMainViewModelModule::class,
         TestAppModule::class]
 )
-interface TestAppComponent : AndroidInjector<TestBaseApplication>{
+interface TestAppComponent : AndroidInjector<TestBaseApplication> {
 
 
     @Component.Builder
