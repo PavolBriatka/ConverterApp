@@ -5,6 +5,7 @@ import android.content.Context
 import com.example.converterapp.BuildConfig
 import com.example.converterapp.database.AppDatabase
 import com.example.converterapp.ui.ConnectivityObservable
+import com.example.converterapp.ui.IConnectivityObervable
 import com.example.converterapp.utils.databaseutil.DatabaseUtil
 import com.example.converterapp.utils.databaseutil.IDatabaseUtil
 import com.example.converterapp.webservice.EndpointDefinition
@@ -33,7 +34,7 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideConnectivityObservable(application: Application): ConnectivityObservable {
+    fun provideConnectivityObservable(application: Application): IConnectivityObervable {
         return ConnectivityObservable(application)
     }
 

@@ -1,12 +1,12 @@
 package com.example.converterapp
 
-import com.example.converterapp.di.DaggerAppComponent
+import com.example.converterapp.di.DaggerTestAppComponent
 import dagger.android.AndroidInjector
 import dagger.android.support.DaggerApplication
 
-open class BaseApplication: DaggerApplication() {
+class TestBaseApplication : DaggerApplication() {
 
     override fun applicationInjector(): AndroidInjector<out DaggerApplication> {
-        return DaggerAppComponent.builder().application(this).build()
+        return DaggerTestAppComponent.builder().application(this).build()
     }
 }

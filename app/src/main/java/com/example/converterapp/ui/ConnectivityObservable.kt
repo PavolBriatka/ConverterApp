@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 class ConnectivityObservable constructor(
     private val connectivityManager: ConnectivityManager
-) {
+) : IConnectivityObervable {
 
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     @Inject
@@ -34,7 +34,7 @@ class ConnectivityObservable constructor(
     }
 
 
-    fun registerNetworkStateObserver() {
+    override fun registerNetworkStateObserver() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val activeNetwork: NetworkCapabilities? = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
@@ -53,11 +53,11 @@ class ConnectivityObservable constructor(
         }
     }
 
-    fun unregisterNetworkStateObserver() {
+    override fun unregisterNetworkStateObserver() {
         connectivityManager.unregisterNetworkCallback(networkCallback)
     }
 
-    fun networkState(): Observable<Boolean> {
+    override fun networkState(): Observable<Boolean> {
         return networkStateSubject.hide()
     }
 }

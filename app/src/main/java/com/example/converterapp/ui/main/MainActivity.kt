@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.converterapp.R
 import com.example.converterapp.di.viewmodelfactory.ViewModelsProviderFactory
 import com.example.converterapp.ui.ConnectivityObservable
+import com.example.converterapp.ui.IConnectivityObervable
 import com.example.converterapp.ui.main.adapter.ConverterAdapter
 import com.example.converterapp.ui.main.viewmodel.MainViewModel
 import com.example.converterapp.utils.mapToArray
@@ -29,7 +30,7 @@ class MainActivity : DaggerAppCompatActivity() {
     lateinit var converterAdapter: ConverterAdapter
 
     @Inject
-    lateinit var connectivityObservable: ConnectivityObservable
+    lateinit var connectivityObservable: IConnectivityObervable
 
     private lateinit var viewModel: MainViewModel
     private lateinit var snackbar: Snackbar
