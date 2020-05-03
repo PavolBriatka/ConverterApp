@@ -1,17 +1,18 @@
 package com.example.converterapp.repository.conversionratesrepo
 
 import com.example.converterapp.repository.ResultBase
+import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.utils.currencyhelper.ICurrencyHelper
 import com.example.converterapp.utils.databaseutil.IDatabaseUtil
 import com.example.converterapp.webservice.conversionratesinteractor.ConversionRatesResponseModel
 import com.example.converterapp.webservice.conversionratesinteractor.IConversionRatesInteractor
 import com.nhaarman.mockito_kotlin.argumentCaptor
-import com.nhaarman.mockito_kotlin.doAnswer
+import com.nhaarman.mockito_kotlin.inOrder
 import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.verifyZeroInteractions
 import io.reactivex.Single
 import okhttp3.MediaType
 import okhttp3.ResponseBody
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyString
@@ -20,7 +21,6 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnitRunner
 import retrofit2.Response
-import java.net.UnknownHostException
 
 @RunWith(MockitoJUnitRunner::class)
 class ConversionRatesRepoTest {
@@ -51,7 +51,7 @@ class ConversionRatesRepoTest {
     }
 
     @Test
-    fun fetchRates_responseSuccess_listOfRatesReturned() {
+    fun fetchRatesNetworkAvailable_responseSuccess_listOfRatesReturned() {
         //Arrange
         currencyHelperResponse()
         resultSuccess()
@@ -64,7 +64,7 @@ class ConversionRatesRepoTest {
     }
 
     @Test
-    fun fetchRates_responseSuccessDataNull_errorReceived() {
+    fun fetchRatesNetworkAvailable_responseSuccessDataNull_errorReceived() {
         //Arrange
         resultSuccessDataNull()
         //Act
@@ -74,7 +74,7 @@ class ConversionRatesRepoTest {
     }
 
     @Test
-    fun fetchRates_responseSuccessBaseCurrencyNullOrEmpty_errorReceived() {
+    fun fetchRatesNetworkAvailable_responseSuccessBaseCurrencyNullOrEmpty_errorReceived() {
         //Arrange
         resultSuccessBaseCurrencyNullOrEmpty()
         //Act
@@ -84,7 +84,7 @@ class ConversionRatesRepoTest {
     }
 
     @Test
-    fun fetchRates_responseSuccessRatesNull_errorReceived() {
+    fun fetchRatesNetworkAvailable_responseSuccessRatesNull_errorReceived() {
         //Arrange
         resultSuccessRatesNull()
         //Act
@@ -94,7 +94,7 @@ class ConversionRatesRepoTest {
     }
 
     @Test
-    fun fetchRates_responseNetworkError_errorReceived() {
+    fun fetchRatesNetworkAvailable_responseNetworkError_errorReceived() {
         //Arrange
         resultResponseError()
         //Act
@@ -103,13 +103,85 @@ class ConversionRatesRepoTest {
         assert(result is ResultBase.Error)
     }
 
-    @Ignore("revise")
-    @Test(expected = UnknownHostException::class)
-    fun fetchRates_errorThrown_errorReceived() {
+    @Test
+    fun fetchRatesNetworkAvailable_success_dataSavedToDatabase() {
         //Arrange
-        resultErrorThrown()
+        currencyHelperResponse()
+        resultSuccess()
+        //Act
+        repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
+        //Assert
+        argumentCaptor<ConversionRatesResult>().apply {
+            verify(databaseUtil).convertAndSave(capture())
+            assert(this.lastValue.conversionRates.size == 4)
+        }
+    }
+
+    @Test
+    fun fetchRatesNetworkAvailable_databaseQueriedFirst() {
+        //Arrange
+        currencyHelperResponse()
+        resultSuccess()
+        //Act
+        repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
+        //Assert
+        val order = inOrder(databaseUtil, interactor)
+        order.verify(databaseUtil).retrieveAndConvert()
+        order.verify(interactor).fetchConversionRates(anyString())
+    }
+
+    @Test
+    fun fetchRatesNetworkAvailable_dataPresentInDatabase_successResultReceived() {
+        //Arrange
+        resultDbDataSuccess()
+        //Act
+        var result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
+        //Assert
+        assert(result is ResultBase.Success)
+        result = result as ResultBase.Success
+        assert(result.result.conversionRates.size == 1)
+        assert(result.result.conversionRates["CZK"] != null)
+    }
+
+    @Test
+    fun fetchRatesNetworkAvailable_dataNOTPresentInDatabase_errorResultReceived() {
+        //Arrange
+        resultDbDataEmpty()
         //Act
         val result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
+        //Assert
+        assert(result is ResultBase.Error)
+    }
+
+    @Test
+    fun fetchRatesNetworkNOTAvailable_networkRequestNotFired() {
+        //Arrange
+        resultDbDataSuccess()
+        //Act
+        repository.fetchConversionRates(isNetworkAvailable = false).blockingFirst()
+        //Assert
+        verifyZeroInteractions(interactor)
+    }
+
+    @Test
+    fun fetchRatesNetworkNOTAvailable_dataPresentInDatabase_successResultReceived() {
+        //Arrange
+        resultDbDataSuccess()
+        //Act
+        var result = repository.fetchConversionRates(isNetworkAvailable = false).blockingFirst()
+        //Assert
+        assert(result is ResultBase.Success)
+        result = result as ResultBase.Success
+        assert(result.result.conversionRates.size == 1)
+        assert(result.result.conversionRates["CZK"] != null)
+    }
+
+    @Test
+    fun fetchRatesNetworkNOTAvailable_dataNOTPresentInDatabase_errorResultReceived() {
+        //Arrange
+        resultDbDataEmpty()
+        //Act
+        val result = repository.fetchConversionRates(isNetworkAvailable = false).blockingFirst()
         //Assert
         assert(result is ResultBase.Error)
     }
@@ -118,6 +190,29 @@ class ConversionRatesRepoTest {
     private fun currencyHelperResponse() {
         Mockito.`when`(currencyHelper.fetchResources(anyString())).thenReturn(
             Pair("Euro", 1)
+        )
+    }
+
+    private fun resultDbDataSuccess() {
+        Mockito.`when`(databaseUtil.retrieveAndConvert()).thenReturn(
+            ConversionRatesResult(
+                conversionRates = mapOf(
+                    "CZK" to Currency(
+                        currencyCode = "CZK",
+                        currencyName = "Koruna",
+                        relativeRate = 25.45,
+                        flagId = 6
+                    )
+                )
+            )
+        )
+    }
+
+    private fun resultDbDataEmpty() {
+        Mockito.`when`(databaseUtil.retrieveAndConvert()).thenReturn(
+            ConversionRatesResult(
+                conversionRates = mapOf()
+            )
         )
     }
 
@@ -180,12 +275,6 @@ class ConversionRatesRepoTest {
                 )
             )
         )
-    }
-
-    private fun resultErrorThrown() {
-        Mockito.`when`(interactor.fetchConversionRates(anyString())).doAnswer {
-            throw UnknownHostException()
-        }
     }
     //endregion
 }
