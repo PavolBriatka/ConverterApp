@@ -1,6 +1,7 @@
 package com.example.converterapp.repository.conversionratesrepo
 
 import com.example.converterapp.repository.ResultBase
+import com.example.converterapp.repository.ResultBase.ErrorType.*
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.utils.currencyhelper.ICurrencyHelper
 import com.example.converterapp.utils.databaseutil.IDatabaseUtil
@@ -64,43 +65,51 @@ class ConversionRatesRepoTest {
     }
 
     @Test
-    fun fetchRatesNetworkAvailable_responseSuccessDataNull_errorReceived() {
+    fun fetchRatesNetworkAvailable_responseSuccessDataNull_networkErrorReceived() {
         //Arrange
         resultSuccessDataNull()
         //Act
-        val result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
+        var result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
         //Assert
         assert(result is ResultBase.Error)
+        result = result as ResultBase.Error
+        assert(result.errorType == NETWORK_ERROR)
     }
 
     @Test
-    fun fetchRatesNetworkAvailable_responseSuccessBaseCurrencyNullOrEmpty_errorReceived() {
+    fun fetchRatesNetworkAvailable_responseSuccessBaseCurrencyNullOrEmpty_networkErrorReceived() {
         //Arrange
         resultSuccessBaseCurrencyNullOrEmpty()
         //Act
-        val result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
+        var result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
         //Assert
         assert(result is ResultBase.Error)
+        result = result as ResultBase.Error
+        assert(result.errorType == NETWORK_ERROR)
     }
 
     @Test
-    fun fetchRatesNetworkAvailable_responseSuccessRatesNull_errorReceived() {
+    fun fetchRatesNetworkAvailable_responseSuccessRatesNull_networkErrorReceived() {
         //Arrange
         resultSuccessRatesNull()
         //Act
-        val result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
+        var result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
         //Assert
         assert(result is ResultBase.Error)
+        result = result as ResultBase.Error
+        assert(result.errorType == NETWORK_ERROR)
     }
 
     @Test
-    fun fetchRatesNetworkAvailable_responseNetworkError_errorReceived() {
+    fun fetchRatesNetworkAvailable_responseNetworkError_networkErrorReceived() {
         //Arrange
         resultResponseError()
         //Act
-        val result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
+        var result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
         //Assert
         assert(result is ResultBase.Error)
+        result = result as ResultBase.Error
+        assert(result.errorType == NETWORK_ERROR)
     }
 
     @Test
@@ -144,13 +153,15 @@ class ConversionRatesRepoTest {
     }
 
     @Test
-    fun fetchRatesNetworkAvailable_dataNOTPresentInDatabase_errorResultReceived() {
+    fun fetchRatesNetworkAvailable_dataNOTPresentInDatabase_databaseErrorResultReceived() {
         //Arrange
         resultDbDataEmpty()
         //Act
-        val result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
+        var result = repository.fetchConversionRates(isNetworkAvailable = true).blockingFirst()
         //Assert
         assert(result is ResultBase.Error)
+        result = result as ResultBase.Error
+        assert(result.errorType == DATABASE_ERROR)
     }
 
     @Test
@@ -177,13 +188,15 @@ class ConversionRatesRepoTest {
     }
 
     @Test
-    fun fetchRatesNetworkNOTAvailable_dataNOTPresentInDatabase_errorResultReceived() {
+    fun fetchRatesNetworkNOTAvailable_dataNOTPresentInDatabase_databaseErrorResultReceived() {
         //Arrange
         resultDbDataEmpty()
         //Act
-        val result = repository.fetchConversionRates(isNetworkAvailable = false).blockingFirst()
+        var result = repository.fetchConversionRates(isNetworkAvailable = false).blockingFirst()
         //Assert
         assert(result is ResultBase.Error)
+        result = result as ResultBase.Error
+        assert(result.errorType == DATABASE_ERROR)
     }
 
     //region Helpers

@@ -1,8 +1,9 @@
 package com.example.converterapp.ui.main.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.converterapp.repository.ResultBase
+import com.example.converterapp.repository.ResultBase.ErrorType.DATABASE_ERROR
+import com.example.converterapp.repository.ResultBase.ErrorType.NETWORK_ERROR
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.repository.conversionratesrepo.IConversionRatesRepo
 import com.example.converterapp.utils.round
@@ -27,6 +28,21 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
         Observable.interval(0, 1, TimeUnit.SECONDS)
             .flatMap {
                 repository.fetchConversionRates(isNetworkAvailable = isNetworkAvailable)
+                    .doOnNext {
+                        if (it is ResultBase.Error) {
+                            when (it.errorType) {
+                                NETWORK_ERROR -> dataErrorSubject.onNext(true)
+                                /*
+                                * Take db error into account only if the network is down*/
+                                DATABASE_ERROR -> {
+                                    if (isNetworkAvailable)
+                                        dataErrorSubject.onNext(false)
+                                    else
+                                        dataErrorSubject.onNext(true)
+                                }
+                            }
+                        }
+                    }
                     .map { result ->
                         when (result) {
                             is ResultBase.Success -> {
@@ -39,13 +55,6 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
                             }
                         }
                     }.take(2)
-            }
-            .doOnNext {
-                if (it.isEmpty()) {
-                    dataErrorSubject.onNext(true)
-                } else {
-                    dataErrorSubject.onNext(false)
-                }
             }
             .filter { it.isNotEmpty() }
             .subscribe(ratesSubject::onNext)

@@ -1,6 +1,7 @@
 package com.example.converterapp.repository.conversionratesrepo
 
 import com.example.converterapp.repository.ResultBase
+import com.example.converterapp.repository.ResultBase.ErrorType.*
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.utils.currencyhelper.ICurrencyHelper
 import com.example.converterapp.utils.databaseutil.IDatabaseUtil
@@ -38,7 +39,7 @@ class ConversionRatesRepo @Inject constructor(
                 dbData.conversionRates.isNotEmpty() -> {
                     ResultBase.Success(dbData)
                 }
-                else -> ResultBase.Error
+                else -> ResultBase.Error(DATABASE_ERROR)
             }
         }.subscribeOn(Schedulers.io())
 
@@ -49,9 +50,9 @@ class ConversionRatesRepo @Inject constructor(
             val ratesArray = assembleData(data)
             return when {
                 ratesArray.isNotEmpty() -> ResultBase.Success(ConversionRatesResult(ratesArray))
-                else -> ResultBase.Error
+                else -> ResultBase.Error(NETWORK_ERROR)
             }
-        } ?: return ResultBase.Error
+        } ?: return ResultBase.Error(NETWORK_ERROR)
     }
 
     private fun assembleData(data: ConversionRatesResponseModel): MutableMap<String, Currency> {
@@ -91,11 +92,11 @@ class ConversionRatesRepo @Inject constructor(
                     .map { response ->
                         when (response.code()) {
                             200 -> handleResponseSuccess(response.body())
-                            else -> ResultBase.Error
+                            else -> ResultBase.Error(NETWORK_ERROR)
                         }
                     }
                     .onErrorReturn {
-                        ResultBase.Error
+                        ResultBase.Error(NETWORK_ERROR)
                     }
             },
             fromStorage = {_, _ ->
@@ -104,7 +105,7 @@ class ConversionRatesRepo @Inject constructor(
                     dbData.conversionRates.isNotEmpty() -> {
                         ResultBase.Success(dbData)
                     }
-                    else -> ResultBase.Error
+                    else -> ResultBase.Error(DATABASE_ERROR)
                 }
             },
             toStorage = { _, _, domain ->
