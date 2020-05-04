@@ -15,6 +15,7 @@ import com.mikhaellopez.circularimageview.CircularImageView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import java.text.DecimalFormat
 
 class ConverterAdapter :
     RecyclerView.Adapter<ConverterAdapter.CurrencyViewHolder>() {
@@ -125,15 +126,23 @@ class ConverterAdapter :
                     }
                     disposables.add(subscribeToData { data ->
                         val value = data[currentItem.currencyCode]?.relativeRate ?: 0.0
-                        var stringValue = String.format("%.2f", value)
-                        if (stringValue.endsWith(".00")) stringValue = stringValue.dropLast(3)
-
-                        conversionValue.setText(stringValue)
+                        conversionValue.setText(transformValue(value))
                     })
                 }
 
             }
         }
+    }
+
+    private fun transformValue(value: Double): String {
+
+        val partialTransform = DecimalFormat().apply {
+            applyPattern("#,##0.00")
+        }.format(value)
+
+        return if (partialTransform.endsWith(".00") ||
+            partialTransform.endsWith(",00")
+        ) partialTransform.dropLast(3) else partialTransform
     }
 
     /*

@@ -83,7 +83,7 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
     private fun validateInput(input: String): Double {
         return when {
             input.isBlank() -> 0.0
-            else -> input.toDouble()
+            else -> input.replace(",",".").toDouble()
         }
     }
 

@@ -4,6 +4,8 @@ import io.reactivex.Observable
 
 class FakeConnectivityObservable : IConnectivityObervable {
 
+    var isAvailable = true
+
     override fun registerNetworkStateObserver() {
         //not needed
     }
@@ -13,6 +15,6 @@ class FakeConnectivityObservable : IConnectivityObervable {
     }
 
     override fun networkState(): Observable<Boolean> {
-        return Observable.just(true)
+        return Observable.just(isAvailable)
     }
 }
