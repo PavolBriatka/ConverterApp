@@ -1,5 +1,6 @@
 package com.example.converterapp.ui.main.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -87,6 +88,7 @@ class ConverterAdapter :
 
             currencyCode.text = currentItem.currencyCode
             currencyName.text = currentItem.currencyName
+            Log.e(currentItem.currencyCode, "${currentItem.flagId}")
             currencyFlag.setImageResource(currentItem.flagId)
             conversionValue.isEnabled = position == 0
 
@@ -137,7 +139,7 @@ class ConverterAdapter :
     private fun transformValue(value: Double): String {
 
         val partialTransform = DecimalFormat().apply {
-            applyPattern("#,##0.00")
+            applyPattern("#0.00")
         }.format(value)
 
         return if (partialTransform.endsWith(".00") ||
@@ -163,9 +165,9 @@ class ConverterAdapter :
     private fun validateInputFieldValue(input: CharSequence): CharSequence {
         return when {
             input.length >= 2 &&
-            input.startsWith("0") &&
-            !input.startsWith("0.") &&
-            !input.startsWith("0,") -> input.substring(1, input.length)
+                    input.startsWith("0") &&
+                    !input.startsWith("0.") &&
+                    !input.startsWith("0,") -> input.substring(1, input.length)
             input.startsWith(".") -> "0."
             input.startsWith(",") -> "0,"
             else -> input
