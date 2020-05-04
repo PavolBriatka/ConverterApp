@@ -1,4 +1,4 @@
-package com.example.converterapp.repository.interactor
+package com.example.converterapp.interactor
 
 import com.example.converterapp.webservice.EndpointDefinition
 import com.example.converterapp.webservice.conversionratesinteractor.ConversionRatesInteractor

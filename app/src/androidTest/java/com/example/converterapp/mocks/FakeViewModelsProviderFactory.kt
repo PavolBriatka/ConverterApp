@@ -1,8 +1,7 @@
-package com.example.converterapp.viewmodelfactory
+package com.example.converterapp.mocks
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.converterapp.repository.FakeConversionRatesRepo
 import com.example.converterapp.ui.main.viewmodel.MainViewModel
 import javax.inject.Inject
 

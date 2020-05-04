@@ -1,4 +1,4 @@
-package com.example.converterapp.ui.viewmodel
+package com.example.converterapp.viewmodel
 
 import com.example.converterapp.repository.ResultBase
 import com.example.converterapp.repository.ResultBase.ErrorType.DATABASE_ERROR

@@ -1,8 +1,10 @@
-package com.example.converterapp.ui
+package com.example.converterapp.mocks
 
+import com.example.converterapp.ui.IConnectivityObervable
 import io.reactivex.Observable
 
-class FakeConnectivityObservable : IConnectivityObervable {
+class FakeConnectivityObservable :
+    IConnectivityObervable {
 
     var isAvailable = true
 

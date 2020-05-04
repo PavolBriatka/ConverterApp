@@ -1,7 +1,8 @@
-package com.example.converterapp.repository.conversionratesrepo
+package com.example.converterapp.repository
 
-import com.example.converterapp.repository.ResultBase
 import com.example.converterapp.repository.ResultBase.ErrorType.*
+import com.example.converterapp.repository.conversionratesrepo.ConversionRatesRepo
+import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult.Currency
 import com.example.converterapp.utils.currencyhelper.ICurrencyHelper
 import com.example.converterapp.utils.databaseutil.IDatabaseUtil

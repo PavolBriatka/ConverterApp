@@ -1,4 +1,4 @@
-package com.example.converterapp
+package com.example.converterapp.ui
 
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
@@ -9,9 +9,11 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ActivityTestRule
-import com.example.converterapp.repository.FakeConversionRatesRepo
-import com.example.converterapp.repository.FakeConversionRatesRepo.Scenario
-import com.example.converterapp.ui.FakeConnectivityObservable
+import com.example.converterapp.R
+import com.example.converterapp.TestBaseApplication
+import com.example.converterapp.mocks.FakeConnectivityObservable
+import com.example.converterapp.mocks.FakeConversionRatesRepo
+import com.example.converterapp.mocks.FakeConversionRatesRepo.Scenario
 import com.example.converterapp.ui.main.MainActivity
 import com.example.converterapp.ui.main.adapter.ConverterAdapter.CurrencyViewHolder
 import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions.Companion.actionOnChild
