@@ -1,6 +1,5 @@
 package com.example.converterapp.ui.main.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -88,7 +87,6 @@ class ConverterAdapter :
 
             currencyCode.text = currentItem.currencyCode
             currencyName.text = currentItem.currencyName
-            Log.e(currentItem.currencyCode, "${currentItem.flagId}")
             currencyFlag.setImageResource(currentItem.flagId)
             conversionValue.isEnabled = position == 0
 
