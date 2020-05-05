@@ -21,7 +21,7 @@ class DatabaseUtil @Inject constructor(private val appDatabase: AppDatabase?) :
                     CurrencyEntity(
                         currencyCode = currency.currencyCode,
                         currencyName = currency.currencyName,
-                        currencyRate = currency.relativeRate,
+                        currencyRate = currency.relativeValue,
                         flagId = currency.flagId
                     )
                 )
@@ -49,7 +49,7 @@ class DatabaseUtil @Inject constructor(private val appDatabase: AppDatabase?) :
                     Currency(
                         currencyCode = it.currencyCode,
                         currencyName = it.currencyName,
-                        relativeRate = it.currencyRate,
+                        relativeValue = it.currencyRate,
                         flagId = it.flagId
                     )
                 )

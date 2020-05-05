@@ -112,8 +112,8 @@ class MainViewModelTest {
         val result = viewModel.getCurrencyData().blockingFirst()
         //assert
         assert(result.size == 2)
-        assert(result["EUR"]?.relativeRate == 0.0)
-        assert(result["GBP"]?.relativeRate == 0.0)
+        assert(result["EUR"]?.relativeValue == 0.0)
+        assert(result["GBP"]?.relativeValue == 0.0)
     }
 
     @Test
@@ -126,8 +126,8 @@ class MainViewModelTest {
         val result = viewModel.getCurrencyData().blockingFirst()
         //assert
         assert(result.size == 2)
-        assert(result["EUR"]?.relativeRate == 2.0)
-        assert(result["GBP"]?.relativeRate == 3.0)
+        assert(result["EUR"]?.relativeValue == 2.0)
+        assert(result["GBP"]?.relativeValue == 3.0)
     }
 
     //region Helpers

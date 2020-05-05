@@ -23,10 +23,8 @@ class ConversionRatesRepo @Inject constructor(
     override fun fetchConversionRates(baseCurrency: String, isNetworkAvailable: Boolean):
             Observable<ResultBase<ConversionRatesResult>> {
         return if (isNetworkAvailable) {
-            //Log.e("Network", "fetch")
             currencyRatesDod.observe(baseCurrency).extractData()
         } else {
-            //Log.e("Database", "fetch")
             fetchConversionRatesFromDatabase()
         }
     }
@@ -66,7 +64,7 @@ class ConversionRatesRepo @Inject constructor(
                     currencyCode = data.baseCurrency,
                     currencyName = baseCurrencyRes?.first!!,
                     flagId = baseCurrencyRes.second,
-                    relativeRate = 1.0
+                    relativeValue = 1.0
                 )
                 //2. Add rest of the currencies
                 for ((code, rate) in data.rates) {
@@ -75,7 +73,7 @@ class ConversionRatesRepo @Inject constructor(
                         currencyCode = code,
                         currencyName = currencyRes?.first!!,
                         flagId = currencyRes.second,
-                        relativeRate = rate
+                        relativeValue = rate
                     )
                 }
             }

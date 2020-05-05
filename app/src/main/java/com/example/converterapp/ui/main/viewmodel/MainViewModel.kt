@@ -46,11 +46,9 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
                     .map { result ->
                         when (result) {
                             is ResultBase.Success -> {
-                                //Log.e("Success", "${result.result.conversionRates.size}")
                                 result.result.conversionRates
                             }
                             else -> {
-                                //Log.e("ERROR", "EMPTY")
                                 mapOf()
                             }
                         }
@@ -65,15 +63,15 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
         return Observable.combineLatest(getCurrencyRates(), getUserInput(),
             BiFunction<Map<String, Currency>, Pair<String, String>, Map<String, Currency>> { ratesMap, baseCurrency ->
 
-                val baseCurrencyRate = ratesMap[baseCurrency.first]?.relativeRate!!
+                val baseCurrencyRate = ratesMap[baseCurrency.first]?.relativeValue!!
                 val userInput = validateInput(baseCurrency.second)
                 val finalData = mutableMapOf<String, Currency>()
 
                 for ((code, currency) in ratesMap) {
                     finalData[code] =
                         currency.copy(
-                            relativeRate =
-                            ((currency.relativeRate / baseCurrencyRate) * userInput).round(2)
+                            relativeValue =
+                            ((currency.relativeValue / baseCurrencyRate) * userInput).round(2)
                         )
                 }
                 finalData

@@ -125,7 +125,7 @@ class ConverterAdapter :
                         moveItem(currentItem)
                     }
                     disposables.add(subscribeToData { data ->
-                        val value = data[currentItem.currencyCode]?.relativeRate ?: 0.0
+                        val value = data[currentItem.currencyCode]?.relativeValue ?: 0.0
                         conversionValue.setText(transformValue(value))
                     })
                 }

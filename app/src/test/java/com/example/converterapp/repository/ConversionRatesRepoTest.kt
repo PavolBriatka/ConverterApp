@@ -214,7 +214,7 @@ class ConversionRatesRepoTest {
                     "CZK" to Currency(
                         currencyCode = "CZK",
                         currencyName = "Koruna",
-                        relativeRate = 25.45,
+                        relativeValue = 25.45,
                         flagId = 6
                     )
                 )
