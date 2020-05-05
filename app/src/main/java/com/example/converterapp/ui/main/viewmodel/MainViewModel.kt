@@ -41,7 +41,7 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
                                         dataErrorSubject.onNext(true)
                                 }
                             }
-                        }
+                        } else dataErrorSubject.onNext(false)
                     }
                     .map { result ->
                         when (result) {
@@ -81,7 +81,7 @@ class MainViewModel @Inject constructor(private val repository: IConversionRates
     private fun validateInput(input: String): Double {
         return when {
             input.isBlank() -> 0.0
-            else -> input.replace(",",".").toDouble()
+            else -> input.replace(",", ".").toDouble()
         }
     }
 
