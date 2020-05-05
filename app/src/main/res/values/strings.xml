@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">Converter App</string>
-    <string name="currency_value_hint">" 0"</string>
 
     //Currency Names
     <string name="aud_name">Australian Dollar</string>
@@ -35,4 +33,12 @@
     <string name="thb_name">Thai Baht</string>
     <string name="usd_name">United States Dollar</string>
     <string name="zar_name">South African Rand</string>
+
+    <string name="app_name">Pocket Converter</string>
+    <string name="currency_value_hint">" 0"</string>
+    <string name="main_screen_title">Rates</string>
+    <string name="response_error_message">Cannot load the latest rates.
+        Please check your Internet connection or try again later.</string>
+    <string name="no_data_screen_message">There seems to be an issue fetching the latest rates.\n
+        Please check your Internet connection or try again later.</string>
 </resources>

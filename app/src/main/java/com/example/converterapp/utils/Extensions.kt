@@ -1,5 +1,7 @@
 package com.example.converterapp.utils
 
+import com.revolut.rxdata.dod.Data
+import io.reactivex.Observable
 import kotlin.math.round
 
 fun Double.round(decimals: Int): Double {
@@ -13,3 +15,6 @@ fun <K, V> Map<K, V>.mapToArray(): ArrayList<V> {
         addAll(this@mapToArray.values)
     }
 }
+
+fun <T> Observable<Data<T>>.extractData(): Observable<T> =
+    filter { it.content != null }.map { it.content!! }

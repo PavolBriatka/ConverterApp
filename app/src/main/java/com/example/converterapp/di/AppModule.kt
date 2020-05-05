@@ -1,6 +1,15 @@
 package com.example.converterapp.di
 
+import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
+import android.preference.PreferenceManager
 import com.example.converterapp.BuildConfig
+import com.example.converterapp.database.AppDatabase
+import com.example.converterapp.ui.ConnectivityObservable
+import com.example.converterapp.ui.IConnectivityObervable
+import com.example.converterapp.utils.databaseutil.DatabaseUtil
+import com.example.converterapp.utils.databaseutil.IDatabaseUtil
 import com.example.converterapp.webservice.EndpointDefinition
 import dagger.Module
 import dagger.Provides
@@ -17,6 +26,37 @@ class AppModule {
 
     companion object {
         const val BASE_URL = "https://hiring.revolut.codes/api/android/"
+        const val APP_PREFERENCES = "appSharedPreferences"
+    }
+
+    @Singleton
+    @Provides
+    fun provideContext(application: Application): Context {
+        return application.applicationContext
+    }
+
+    @Singleton
+    @Provides
+    fun provideConnectivityObservable(application: Application): IConnectivityObervable {
+        return ConnectivityObservable(application)
+    }
+
+    @Singleton
+    @Provides
+    fun provideAppDatabase(context: Context): AppDatabase? {
+        return AppDatabase.getDatabase(context)
+    }
+
+    @Singleton
+    @Provides
+    fun provideSharedPreferences(context: Context): SharedPreferences {
+        return context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
+    }
+
+    @Singleton
+    @Provides
+    fun provideDatabaseUtil(appDatabase: AppDatabase?, sharedPreferences: SharedPreferences): IDatabaseUtil {
+        return DatabaseUtil(appDatabase, sharedPreferences)
     }
 
     @Singleton

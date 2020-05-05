@@ -5,5 +5,6 @@ import io.reactivex.Observable
 
 interface IConversionRatesRepo {
 
-    fun fetchConversionRates(baseCurrency: String = "EUR"): Observable<out ResultBase<ConversionRatesResult>>
+    fun fetchConversionRates(baseCurrency: String = "EUR", isNetworkAvailable: Boolean):
+            Observable<ResultBase<ConversionRatesResult>>
 }
