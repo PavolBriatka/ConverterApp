@@ -87,7 +87,9 @@ class ConverterAdapter :
 
             currencyCode.text = currentItem.currencyCode
             currencyName.text = currentItem.currencyName
-            currencyFlag.setImageResource(currentItem.flagId)
+            currencyFlag.setImageResource(
+                if (currentItem.flagId != -1) currentItem.flagId else R.drawable.ic_flag_default
+            )
             conversionValue.isEnabled = position == 0
 
             disposables.clear()

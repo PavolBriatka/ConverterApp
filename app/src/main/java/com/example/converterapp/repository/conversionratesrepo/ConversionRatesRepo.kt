@@ -84,8 +84,8 @@ class ConversionRatesRepo @Inject constructor(
                     val currencyRes = currencyHelper.fetchResources(code)
                     currencyRates[code] = Currency(
                         currencyCode = code,
-                        currencyName = currencyRes?.first!!,
-                        flagId = currencyRes.second,
+                        currencyName = currencyRes?.first ?: "",
+                        flagId = currencyRes?.second ?: -1,
                         relativeValue = rate
                     )
                 }
