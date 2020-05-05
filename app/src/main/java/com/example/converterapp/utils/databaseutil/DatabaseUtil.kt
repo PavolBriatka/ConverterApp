@@ -1,5 +1,6 @@
 package com.example.converterapp.utils.databaseutil
 
+import android.content.SharedPreferences
 import com.example.converterapp.database.AppDatabase
 import com.example.converterapp.database.CurrencyEntity
 import com.example.converterapp.repository.conversionratesrepo.ConversionRatesResult
@@ -7,8 +8,24 @@ import com.example.converterapp.repository.conversionratesrepo.ConversionRatesRe
 import com.example.converterapp.utils.mapToArray
 import javax.inject.Inject
 
-class DatabaseUtil @Inject constructor(private val appDatabase: AppDatabase?) :
+class DatabaseUtil @Inject constructor(private val appDatabase: AppDatabase?,
+ private val sharedPreferences: SharedPreferences) :
     IDatabaseUtil {
+
+    companion object {
+        private const val IS_FIRST_TIME_OPEN = "is_first_time_open"
+    }
+
+    override fun clearDatabase() {
+
+        val isFirstTime = sharedPreferences.getBoolean(IS_FIRST_TIME_OPEN, true)
+        if (isFirstTime) {
+            sharedPreferences.edit().putBoolean(IS_FIRST_TIME_OPEN, false).apply()
+            appDatabase?.clearAllTables()
+        }
+
+
+    }
 
     override fun convertAndSave(data: ConversionRatesResult) {
 

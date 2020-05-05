@@ -6,4 +6,5 @@ interface IDatabaseUtil {
 
     fun convertAndSave(data: ConversionRatesResult)
     fun retrieveAndConvert(): ConversionRatesResult
+    fun clearDatabase()
 }

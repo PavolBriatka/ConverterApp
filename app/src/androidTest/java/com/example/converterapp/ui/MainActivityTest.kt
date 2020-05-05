@@ -331,6 +331,4 @@ class MainActivityTest {
             )
         )
     }
-
-
 }

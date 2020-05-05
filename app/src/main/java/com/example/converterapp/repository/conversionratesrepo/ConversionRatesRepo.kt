@@ -22,6 +22,19 @@ class ConversionRatesRepo @Inject constructor(
 
     override fun fetchConversionRates(baseCurrency: String, isNetworkAvailable: Boolean):
             Observable<ResultBase<ConversionRatesResult>> {
+
+        /**
+         * This action is actually performed only if the user:
+         * 1. installs and opens the app for the very first time
+         * 2. uninstalls the app and opens it again
+         * 3. clears data manually in App Manager on the device
+         * This serves to clear any previously stored arbitrary currency flag IDs that might have been
+         * restored (on SDK 23 and up data backup happens automatically) after the user reinstalled
+         * the app. Reinstalling causes that currency flag drawables are assigned new arbitrary Int
+         * values that are not the same as the previous ones which caused UI inconsistencies.
+         * */
+        databaseUtil.clearDatabase()
+
         return if (isNetworkAvailable) {
             currencyRatesDod.observe(baseCurrency).extractData()
         } else {
